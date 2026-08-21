@@ -1,0 +1,13 @@
+package com.basecamp.app.domain.model
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Event(
+    val id: String,
+    val title: String,
+    val cause: String,
+    val location: String,
+    val date: String,
+    val orgName: String
+)
