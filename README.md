@@ -6,7 +6,7 @@ Built entirely with a strict **Neo-Brutalist** design language, BaseCamp rejects
 
 ---
 
-## 🎯 The Problem Statement
+## 🎯 Why did we make it?
 
 Currently in India, there is no dedicated platform for companies or organizations to find volunteers—nor is there a reliable platform for individuals to find local events where they can volunteer. 
 
