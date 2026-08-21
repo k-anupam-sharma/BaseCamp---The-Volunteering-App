@@ -6,11 +6,15 @@ Built entirely with a strict **Neo-Brutalist** design language, BaseCamp rejects
 
 ---
 
-## 🎯 Why Did We Make It?
-Volunteering platforms are often clunky, outdated, and lack the engagement necessary to keep younger demographics coming back. BaseCamp was created to solve this by:
-1. **Removing Friction**: Creating a seamless flow from event discovery to physical check-in.
-2. **Introducing Gamification**: Rewarding volunteers with earned badges and massive typography showcasing their total impact hours.
-3. **Standing Out**: Utilizing a Neo-Brutalist aesthetic (solid black shadows, thick borders, high-contrast Electric Yellows and Hot Pinks) to make the app feel like a modern, premium experience rather than a tedious form.
+## 🎯 The Problem Statement
+
+Currently in India, there is no dedicated platform for companies or organizations to find volunteers—nor is there a reliable platform for individuals to find local events where they can volunteer. 
+
+The existing ecosystem relies heavily on:
+1. **Word-of-mouth** and personal referrals.
+2. **WhatsApp channels** that send out irregular, disorganized, and vague updates regarding volunteering events.
+
+BaseCamp was created to fix this fragmentation. We provide a centralized, common platform for both parties. By making the onboarding process incredibly easy, fun, and highly engaging through our Neo-Brutalist design, BaseCamp aims to solve the volunteering disconnect in India—while building a scalable foundation for future monetization.
 
 ---
 
