@@ -15,7 +15,7 @@ import javax.inject.Inject
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
-    object Success : AuthState()
+    data class Success(val role: String) : AuthState()
     data class Error(val message: String) : AuthState()
 }
 
@@ -35,7 +35,8 @@ class AuthViewModel @Inject constructor(
                     this.email = email
                     this.password = password
                 }
-                _authState.value = AuthState.Success
+                // For demo purposes, we'll assume "Volunteer". In a real app, fetch from Supabase metadata.
+                _authState.value = AuthState.Success("Volunteer")
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Login failed")
             }
@@ -51,7 +52,7 @@ class AuthViewModel @Inject constructor(
                     this.password = password
                     // Typically role is stored in user metadata or a separate public table.
                 }
-                _authState.value = AuthState.Success
+                _authState.value = AuthState.Success(role)
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Signup failed")
             }

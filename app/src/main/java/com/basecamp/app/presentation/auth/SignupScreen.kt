@@ -18,7 +18,7 @@ import com.basecamp.app.presentation.components.BrutalistTextField
 @Composable
 fun SignupScreen(
     onNavigateToLogin: () -> Unit,
-    onSignupSuccess: () -> Unit,
+    onSignupSuccess: (String) -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     var email by remember { mutableStateOf("") }
@@ -29,7 +29,7 @@ fun SignupScreen(
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
-            onSignupSuccess()
+            onSignupSuccess((authState as AuthState.Success).role)
         }
     }
 
