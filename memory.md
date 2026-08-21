@@ -1,14 +1,12 @@
 # Project Memory / Current State
 
 ## What is working
-*   [Date] - Documentation finalized for BaseCamp.
-*   [Date] - Antigravity workspace initialized.
+*   Completed Phases 1 through 4.
+*   Neo-Brutalist UI engine is active (`BrutalistButton`, `BrutalistCard`, custom shadows).
+*   Supabase Auth is configured with Role Selection.
+*   Navigation graph successfully routes Volunteers and Organizations.
+*   BaseCamp Feed and Event Creation screens are built.
+*   Volunteer Profile grid and typography are implemented.
 
 ## What we are currently working on
-*   Phase 1: Setting up Gradle dependencies and building the Neo-Brutalist UI components.
-
-## Known Bugs / Issues to fix later
-*   None yet.
-
-## Next immediate step
-*   Generate the `build.gradle.kts` configuration and write the custom Modifier for Brutalist drop shadows.
+*   Phase 5: Hardware integration (QR generation and scanning) and push notifications.
