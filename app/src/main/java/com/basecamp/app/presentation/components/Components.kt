@@ -75,11 +75,13 @@ fun BrutalistTextField(
     placeholder: String = "",
     isPassword: Boolean = false,
     backgroundColor: Color = Color.White,
-    cornerRadius: Dp = 0.dp
+    cornerRadius: Dp = 0.dp,
+    readOnly: Boolean = false
 ) {
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
+        readOnly = readOnly,
         modifier = modifier
             .fillMaxWidth()
             .brutalistStyle(cornerRadius = cornerRadius)
