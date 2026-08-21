@@ -15,6 +15,7 @@ sealed class Screen(val route: String) {
     object Signup : Screen("signup")
     object VolunteerDashboard : Screen("volunteer_dashboard")
     object OrgDashboard : Screen("org_dashboard")
+    object ScanTicket : Screen("scan_ticket")
 }
 
 @Composable
@@ -70,7 +71,15 @@ fun BaseCampNavGraph(
         }
 
         composable(route = Screen.OrgDashboard.route) {
-            OrgDashboardScreen()
+            OrgDashboardScreen(
+                onNavigateToScan = { navController.navigate(Screen.ScanTicket.route) }
+            )
+        }
+        
+        composable(route = Screen.ScanTicket.route) {
+            com.basecamp.app.presentation.screens.organization.ScanTicketScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }
