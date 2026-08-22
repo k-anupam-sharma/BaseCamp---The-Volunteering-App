@@ -21,6 +21,7 @@ fun SignupScreen(
     onSignupSuccess: (String) -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("Volunteer") } // "Volunteer" or "Organization"
@@ -105,7 +106,7 @@ fun SignupScreen(
         } else {
             BrutalistButton(
                 text = "SIGN UP",
-                onClick = { viewModel.signup(email, password, selectedRole) },
+                onClick = { viewModel.signup(name, email, password, selectedRole) },
                 backgroundColor = Color(0xFF00E5FF), // Bright Cyan for primary action
                 modifier = Modifier.fillMaxWidth()
             )
@@ -130,5 +131,6 @@ fun SignupScreen(
         )
     }
 }
+
 
 

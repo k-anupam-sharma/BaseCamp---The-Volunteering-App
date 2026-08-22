@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.basecamp.domain.model.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +40,8 @@ class OrgViewModel @Inject constructor(
                     cause = cause,
                     location = location,
                     date = date,
-                    orgName = orgName
+                    orgName = orgName,
+                    orgId = supabaseClient.auth.currentUserOrNull()?.id ?: ""
                 )
                 
                 supabaseClient.postgrest["Events"].insert(newEvent)
@@ -54,5 +56,7 @@ class OrgViewModel @Inject constructor(
         _createState.value = CreateEventState.Idle
     }
 }
+
+
 
 
