@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.basecamp.domain.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jan.supabase.gotrue.SessionStatus
+import io.github.jan.supabase.gotrue.providers.Google
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
@@ -30,6 +32,29 @@ class AuthViewModel @Inject constructor(
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     val client: SupabaseClient = supabaseClient
+    init {
+        viewModelScope.launch {
+            supabaseClient.auth.sessionStatus.collect { status ->
+                when (status) {
+                    is SessionStatus.Authenticated -> {
+                        handleGoogleLoginSuccess()
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    fun loginWithGoogle() {
+        viewModelScope.launch {
+            try {
+                supabaseClient.auth.signInWith(Google)
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Google Sign-in failed")
+            }
+        }
+    }
+
 
     fun handleGoogleLoginSuccess() {
         viewModelScope.launch {
