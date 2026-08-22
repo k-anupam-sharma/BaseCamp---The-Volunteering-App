@@ -25,11 +25,17 @@ object SupabaseModule {
             supabaseUrl = supabaseUrl,
             supabaseKey = supabaseKey
         ) {
-            install(Auth)
+            install(Auth) {
+                scheme = "basecamp"
+                host = "login-callback"
+            }
+            install(io.github.jan.supabase.compose.auth.ComposeAuth)
             install(Postgrest)
         }
     }
 }
+
+
 
 
 

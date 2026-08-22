@@ -29,6 +29,40 @@ class AuthViewModel @Inject constructor(
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
+    val client: SupabaseClient = supabaseClient
+
+    fun handleGoogleLoginSuccess() {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                val userId = supabaseClient.auth.currentUserOrNull()?.id ?: throw Exception("User not found")
+                
+                // Check if user exists in our public table
+                val existingUserList = supabaseClient.postgrest["users"]
+                    .select { filter { eq("id", userId) } }
+                    .decodeList<User>()
+                
+                val role = if (existingUserList.isNotEmpty()) {
+                    existingUserList.first().role
+                } else {
+                    // New Google user, default to Volunteer
+                    val newUser = User(
+                        id = userId,
+                        name = supabaseClient.auth.currentUserOrNull()?.userMetadata?.get("full_name")?.toString() ?: "Volunteer",
+                        role = "Volunteer",
+                        email = supabaseClient.auth.currentUserOrNull()?.email ?: ""
+                    )
+                    supabaseClient.postgrest["users"].insert(newUser)
+                    "Volunteer"
+                }
+                
+                _authState.value = AuthState.Success(role)
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Google Login failed")
+            }
+        }
+    }
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
@@ -81,3 +115,4 @@ class AuthViewModel @Inject constructor(
         _authState.value = AuthState.Idle
     }
 }
+

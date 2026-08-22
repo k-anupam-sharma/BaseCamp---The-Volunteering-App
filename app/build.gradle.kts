@@ -78,6 +78,7 @@ dependencies {
     // Supabase
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.0")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.0.0")
+    implementation("io.github.jan-tennert.supabase:compose-auth:2.0.0")
     implementation("io.ktor:ktor-client-android:2.3.5")
 
     // CameraX
@@ -99,6 +100,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
 
 
 
