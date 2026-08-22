@@ -40,15 +40,15 @@ class ScanViewModel @Inject constructor(
                 val eventId = json.getString("eventId")
                 val volunteerId = json.getString("volunteerId")
 
-                // Update RSVPs table in Supabase
-                supabaseClient.postgrest["RSVPs"].update(
+                // Update tickets table in Supabase
+                supabaseClient.postgrest["tickets"].update(
                     {
                         set("status", "Attended")
                     }
                 ) {
                     filter {
-                        eq("eventId", eventId)
-                        eq("volunteerId", volunteerId)
+                        eq("event_id", eventId)
+                        eq("volunteer_id", volunteerId)
                     }
                 }
 

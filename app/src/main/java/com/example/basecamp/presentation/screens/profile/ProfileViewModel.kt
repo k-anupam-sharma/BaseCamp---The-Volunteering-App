@@ -20,6 +20,18 @@ sealed class ProfileState {
     data class Error(val message: String) : ProfileState()
 }
 
+data class VolunteerBadge(
+    val title: String,
+    val requiredRsvps: Int,
+    val color: Long
+)
+
+val GAMIFICATION_BADGES = listOf(
+    VolunteerBadge("FIRST BLOOD", 1, 0xFFFAFF00), // Electric Yellow
+    VolunteerBadge("COMMUNITY VETERAN", 5, 0xFFFF007F), // Hot Pink
+    VolunteerBadge("LOCAL HERO", 10, 0xFF00E5FF)  // Cyan
+)
+
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val supabaseClient: SupabaseClient
@@ -57,7 +69,8 @@ class ProfileViewModel @Inject constructor(
                     .select { filter { eq("volunteer_id", userId) } }
                     .decodeList<Ticket>()
                     
-                _rsvpCount.value = tickets.size
+                val attendedTickets = tickets.filter { it.status == "Attended" }
+                _rsvpCount.value = attendedTickets.size
                 _profileState.value = ProfileState.Success(user)
             } catch (e: Exception) {
                 _profileState.value = ProfileState.Error(e.message ?: "Failed to fetch profile")

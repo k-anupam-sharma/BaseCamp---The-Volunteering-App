@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.basecamp.presentation.components.BrutalistButton
+import com.example.basecamp.presentation.components.BrutalistCard
 import com.example.basecamp.presentation.components.BrutalistTextField
 
 @Composable
@@ -169,6 +170,62 @@ fun ProfileScreen(
                 onValueChange = { website = it },
                 placeholder = "WEBSITE"
             )
+
+            if (user.role.equals("Volunteer", ignoreCase = true)) {
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = "MY BADGES",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    GAMIFICATION_BADGES.forEach { badge ->
+                        val isUnlocked = rsvpCount >= badge.requiredRsvps
+                        val bgColor = if (isUnlocked) Color(badge.color) else Color.LightGray
+                        val textColor = if (isUnlocked) Color.Black else Color.DarkGray
+                        val lockText = if (isUnlocked) "★" else "🔒"
+
+                            BrutalistCard(
+                            modifier = Modifier.weight(1f).height(140.dp),
+                            backgroundColor = bgColor
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = lockText,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = textColor
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = badge.title,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = textColor,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    lineHeight = 14.sp
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "${badge.requiredRsvps} RSVPs",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = textColor
+                                )
+                            }
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(48.dp))
 

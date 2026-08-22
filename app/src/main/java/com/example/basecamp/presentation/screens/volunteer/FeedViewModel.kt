@@ -40,6 +40,9 @@ class FeedViewModel @Inject constructor(
     
     private val _rsvpEventIds = MutableStateFlow<Set<String>>(emptySet())
     val rsvpEventIds: StateFlow<Set<String>> = _rsvpEventIds.asStateFlow()
+    
+    private val _attendedCount = MutableStateFlow<Int>(0)
+    val attendedCount: StateFlow<Int> = _attendedCount.asStateFlow()
 
     val currentUserId: String
         get() = supabaseClient.auth.currentUserOrNull()?.id ?: "unknown"
@@ -66,6 +69,9 @@ class FeedViewModel @Inject constructor(
                 // Get my RSVPs
                 val myRsvpIds = allTickets.filter { it.volunteerId == userId }.map { it.eventId }.toSet()
                 _rsvpEventIds.value = myRsvpIds
+                
+                val myAttendedCount = allTickets.count { it.volunteerId == userId && it.status == "Attended" }
+                _attendedCount.value = myAttendedCount
                 
                 val ticketCounts = allTickets.groupingBy { it.eventId }.eachCount()
                 
