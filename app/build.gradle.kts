@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)
     id("com.google.dagger.hilt.android")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 val localProperties = Properties()
@@ -78,6 +79,7 @@ dependencies {
 
     // Supabase
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.0.0")
     implementation("io.github.jan-tennert.supabase:compose-auth:2.0.0")
     implementation("io.ktor:ktor-client-android:2.3.5")
