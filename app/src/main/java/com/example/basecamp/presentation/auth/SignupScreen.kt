@@ -25,6 +25,8 @@ fun SignupScreen(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     var name by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var website by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("Volunteer") } // "Volunteer" or "Organization"
@@ -87,6 +89,34 @@ fun SignupScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        if (selectedRole == "Volunteer") {
+            BrutalistTextField(
+                value = name,
+                onValueChange = { name = it },
+                placeholder = "FULL NAME"
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        } else {
+            BrutalistTextField(
+                value = name,
+                onValueChange = { name = it },
+                placeholder = "ORGANIZATION NAME"
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            BrutalistTextField(
+                value = phone,
+                onValueChange = { phone = it },
+                placeholder = "PHONE NUMBER (OPTIONAL)"
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            BrutalistTextField(
+                value = website,
+                onValueChange = { website = it },
+                placeholder = "WEBSITE (OPTIONAL)"
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         BrutalistTextField(
             value = email,
             onValueChange = { email = it },
@@ -119,7 +149,7 @@ fun SignupScreen(
 
             BrutalistButton(
                 text = "SIGN UP",
-                onClick = { viewModel.signup(name, email, password, selectedRole) },
+                onClick = { viewModel.signup(name, email, password, selectedRole, phone.takeIf { selectedRole == "Organization" }, website.takeIf { selectedRole == "Organization" }) },
                 backgroundColor = Color(0xFF00E5FF), // Bright Cyan for primary action
                 modifier = Modifier.fillMaxWidth()
             )

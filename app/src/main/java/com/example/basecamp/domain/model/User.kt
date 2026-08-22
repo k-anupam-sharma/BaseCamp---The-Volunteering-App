@@ -9,5 +9,7 @@ data class User(
     @SerialName("created_at") val createdAt: String? = null,
     val name: String,
     val role: String, // 'Volunteer' or 'Organization'
-    val email: String
+    val email: String,
+    val phone: String? = null,
+    val website: String? = null
 )

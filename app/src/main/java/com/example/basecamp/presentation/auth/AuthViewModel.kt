@@ -84,7 +84,7 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun signup(name: String, email: String, password: String, role: String) {
+    fun signup(name: String, email: String, password: String, role: String, phone: String? = null, website: String? = null) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
@@ -99,7 +99,9 @@ class AuthViewModel @Inject constructor(
                     id = userId,
                     name = name,
                     role = role,
-                    email = email
+                    email = email,
+                    phone = phone,
+                    website = website
                 )
                 
                 supabaseClient.postgrest["users"].insert(newUser)
