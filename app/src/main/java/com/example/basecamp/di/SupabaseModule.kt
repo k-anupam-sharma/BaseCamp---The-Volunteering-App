@@ -18,8 +18,8 @@ object SupabaseModule {
     @Singleton
     fun provideSupabaseClient(): SupabaseClient {
         // TODO: Replace with your actual Supabase URL and Anon Key (e.g. from BuildConfig or local.properties)
-        val supabaseUrl = "https://PLACEHOLDER.supabase.co"
-        val supabaseKey = "PLACEHOLDER_KEY"
+        val supabaseUrl = com.example.basecamp.BuildConfig.SUPABASE_URL
+        val supabaseKey = com.example.basecamp.BuildConfig.SUPABASE_KEY
         
         return createSupabaseClient(
             supabaseUrl = supabaseUrl,
@@ -30,5 +30,6 @@ object SupabaseModule {
         }
     }
 }
+
 
 
