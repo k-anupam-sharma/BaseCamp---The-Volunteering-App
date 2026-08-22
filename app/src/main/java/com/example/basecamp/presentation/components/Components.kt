@@ -18,8 +18,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.basecamp.presentation.theme.brutalistStyle
 
 @Composable
@@ -44,7 +46,7 @@ fun BrutalistButton(
             text = text.uppercase(),
             color = textColor,
             fontWeight = FontWeight.ExtraBold, // Geometric and bold
-            letterSpacing = 1.dp
+            letterSpacing = 1.sp
         )
     }
 }
@@ -106,5 +108,6 @@ fun BrutalistTextField(
         }
     )
 }
+
 
 
