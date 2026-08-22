@@ -44,7 +44,7 @@ class OrgViewModel @Inject constructor(
                     orgId = supabaseClient.auth.currentUserOrNull()?.id ?: ""
                 )
                 
-                supabaseClient.postgrest["Events"].insert(newEvent)
+                supabaseClient.postgrest["events"].insert(newEvent)
                 _createState.value = CreateEventState.Success
             } catch (e: Exception) {
                 _createState.value = CreateEventState.Error(e.message ?: "Failed to create event")
@@ -56,6 +56,7 @@ class OrgViewModel @Inject constructor(
         _createState.value = CreateEventState.Idle
     }
 }
+
 
 
 

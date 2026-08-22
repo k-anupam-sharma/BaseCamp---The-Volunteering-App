@@ -35,7 +35,7 @@ class FeedViewModel @Inject constructor(
             _feedState.value = FeedState.Loading
             try {
                 // Fetch events from the Supabase "Events" table
-                val events = supabaseClient.postgrest["Events"]
+                val events = supabaseClient.postgrest["events"]
                     .select()
                     .decodeList<Event>()
                 
@@ -46,5 +46,6 @@ class FeedViewModel @Inject constructor(
         }
     }
 }
+
 
 
