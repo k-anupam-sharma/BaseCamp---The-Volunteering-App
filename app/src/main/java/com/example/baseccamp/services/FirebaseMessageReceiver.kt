@@ -1,4 +1,4 @@
-package com.basecamp.app.services
+package com.example.baseccamp.services
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -47,3 +47,4 @@ class FirebaseMessageReceiver : FirebaseMessagingService() {
         notificationManager.notify(System.currentTimeMillis().toInt(), builder.build())
     }
 }
+

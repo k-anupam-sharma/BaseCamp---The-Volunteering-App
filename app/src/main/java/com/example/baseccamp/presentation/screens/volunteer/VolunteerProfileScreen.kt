@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.screens.volunteer
+package com.example.baseccamp.presentation.screens.volunteer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.basecamp.app.presentation.components.BrutalistCard
+import com.example.baseccamp.presentation.components.BrutalistCard
 
 data class Badge(val id: String, val title: String, val icon: String)
 
@@ -140,3 +140,4 @@ fun VolunteerProfileScreen() {
         }
     }
 }
+

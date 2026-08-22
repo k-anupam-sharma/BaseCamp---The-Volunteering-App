@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.theme
+package com.example.baseccamp.presentation.theme
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,3 +38,4 @@ fun Modifier.brutalistStyle(
         color = borderColor,
         shape = RoundedCornerShape(cornerRadius)
     )
+

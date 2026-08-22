@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.auth
+package com.example.baseccamp.presentation.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,8 +12,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.basecamp.app.presentation.components.BrutalistButton
-import com.basecamp.app.presentation.components.BrutalistTextField
+import com.example.baseccamp.presentation.components.BrutalistButton
+import com.example.baseccamp.presentation.components.BrutalistTextField
 
 @Composable
 fun LoginScreen(
@@ -103,3 +103,4 @@ fun LoginScreen(
         )
     }
 }
+

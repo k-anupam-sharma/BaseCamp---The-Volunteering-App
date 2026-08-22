@@ -1,6 +1,6 @@
-package com.basecamp.app.data.repository
+package com.example.baseccamp.data.repository
 
-import com.basecamp.app.domain.repository.UserRepository
+import com.example.baseccamp.domain.repository.UserRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import javax.inject.Inject
@@ -26,3 +26,4 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 }
+

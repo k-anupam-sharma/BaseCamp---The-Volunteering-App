@@ -1,4 +1,4 @@
-package com.basecamp.app.domain.model
+package com.example.baseccamp.domain.model
 
 import kotlinx.serialization.Serializable
 
@@ -12,3 +12,4 @@ data class Event(
     val date: String,
     val orgName: String
 )
+

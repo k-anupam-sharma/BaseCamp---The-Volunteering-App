@@ -1,4 +1,4 @@
-package com.basecamp.app.di
+package com.example.baseccamp.di
 
 import dagger.Module
 import dagger.Provides
@@ -30,3 +30,4 @@ object SupabaseModule {
         }
     }
 }
+

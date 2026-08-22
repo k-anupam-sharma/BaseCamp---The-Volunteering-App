@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.screens.volunteer
+package com.example.baseccamp.presentation.screens.volunteer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,9 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.basecamp.app.domain.model.Event
-import com.basecamp.app.presentation.components.BrutalistButton
-import com.basecamp.app.presentation.components.BrutalistCard
+import com.example.baseccamp.domain.model.Event
+import com.example.baseccamp.presentation.components.BrutalistButton
+import com.example.baseccamp.presentation.components.BrutalistCard
 
 @Composable
 fun VolunteerDashboardScreen(
@@ -127,3 +127,4 @@ fun EventCard(event: Event, onRsvpClick: () -> Unit) {
         }
     }
 }
+

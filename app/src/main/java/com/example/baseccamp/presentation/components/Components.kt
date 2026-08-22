@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.components
+package com.example.baseccamp.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +20,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.basecamp.app.presentation.theme.brutalistStyle
+import com.example.baseccamp.presentation.theme.brutalistStyle
 
 @Composable
 fun BrutalistButton(
@@ -106,3 +106,4 @@ fun BrutalistTextField(
         }
     )
 }
+

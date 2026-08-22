@@ -1,8 +1,8 @@
-package com.basecamp.app.presentation.screens.organization
+package com.example.baseccamp.presentation.screens.organization
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.basecamp.app.domain.model.Event
+import com.example.baseccamp.domain.model.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
@@ -54,3 +54,4 @@ class OrgViewModel @Inject constructor(
         _createState.value = CreateEventState.Idle
     }
 }
+

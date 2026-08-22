@@ -1,14 +1,14 @@
-package com.basecamp.app.presentation.navigation
+package com.example.baseccamp.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.basecamp.app.presentation.auth.LoginScreen
-import com.basecamp.app.presentation.auth.SignupScreen
-import com.basecamp.app.presentation.screens.organization.OrgDashboardScreen
-import com.basecamp.app.presentation.screens.volunteer.VolunteerDashboardScreen
+import com.example.baseccamp.presentation.auth.LoginScreen
+import com.example.baseccamp.presentation.auth.SignupScreen
+import com.example.baseccamp.presentation.screens.organization.OrgDashboardScreen
+import com.example.baseccamp.presentation.screens.volunteer.VolunteerDashboardScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -77,9 +77,10 @@ fun BaseCampNavGraph(
         }
         
         composable(route = Screen.ScanTicket.route) {
-            com.basecamp.app.presentation.screens.organization.ScanTicketScreen(
+            com.example.baseccamp.presentation.screens.organization.ScanTicketScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
     }
 }
+

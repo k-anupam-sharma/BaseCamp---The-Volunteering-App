@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.auth
+package com.example.baseccamp.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -63,3 +63,4 @@ class AuthViewModel @Inject constructor(
         _authState.value = AuthState.Idle
     }
 }
+

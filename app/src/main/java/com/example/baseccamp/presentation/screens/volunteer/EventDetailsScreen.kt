@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.screens.volunteer
+package com.example.baseccamp.presentation.screens.volunteer
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
@@ -14,9 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.basecamp.app.domain.model.Event
-import com.basecamp.app.presentation.components.BrutalistButton
-import com.basecamp.app.presentation.components.BrutalistCard
+import com.example.baseccamp.domain.model.Event
+import com.example.baseccamp.presentation.components.BrutalistButton
+import com.example.baseccamp.presentation.components.BrutalistCard
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import org.json.JSONObject
@@ -178,3 +178,4 @@ fun generateQrCode(content: String, size: Int): Bitmap? {
         null
     }
 }
+

@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.screens.organization
+package com.example.baseccamp.presentation.screens.organization
 
 import android.graphics.ImageFormat
 import androidx.camera.core.ImageAnalysis
@@ -43,3 +43,4 @@ class QrAnalyzer(
         image.close()
     }
 }
+

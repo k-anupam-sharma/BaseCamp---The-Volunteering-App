@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.screens.organization
+package com.example.baseccamp.presentation.screens.organization
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.basecamp.app.presentation.components.BrutalistButton
-import com.basecamp.app.presentation.components.BrutalistCard
+import com.example.baseccamp.presentation.components.BrutalistButton
+import com.example.baseccamp.presentation.components.BrutalistCard
 import java.util.concurrent.Executors
 
 @Composable
@@ -220,3 +220,4 @@ fun ScanTicketScreen(
         }
     }
 }
+

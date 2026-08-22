@@ -1,4 +1,4 @@
-package com.basecamp.app.presentation.screens.organization
+package com.example.baseccamp.presentation.screens.organization
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -63,3 +63,4 @@ class ScanViewModel @Inject constructor(
         _scanState.value = ScanState.Scanning
     }
 }
+
