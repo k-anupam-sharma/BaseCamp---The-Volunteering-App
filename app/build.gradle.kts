@@ -28,8 +28,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL", "https://PLACEHOLDER.supabase.co")}\"")
-        buildConfigField("String", "SUPABASE_KEY", "\"${localProperties.getProperty("SUPABASE_KEY", "PLACEHOLDER_KEY")}\"")
+        val rawUrl = localProperties.getProperty("SUPABASE_URL", "https://PLACEHOLDER.supabase.co").replace("\"", "")
+        val rawKey = localProperties.getProperty("SUPABASE_KEY", "PLACEHOLDER_KEY").replace("\"", "")
+        buildConfigField("String", "SUPABASE_URL", "\"${rawUrl}\"")
+        buildConfigField("String", "SUPABASE_KEY", "\"${rawKey}\"")
     }
 
     buildTypes {
@@ -97,6 +99,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
+
 
 
 
