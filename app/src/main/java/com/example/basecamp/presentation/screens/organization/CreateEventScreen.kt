@@ -27,6 +27,7 @@ fun CreateEventScreen(
     var date by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var cause by remember { mutableStateOf("") }
+    var maxVolunteers by remember { mutableStateOf("") }
     
     val causes = listOf("Environment", "Education", "Health", "Community", "Other")
     var expanded by remember { mutableStateOf(false) }
@@ -80,6 +81,12 @@ fun CreateEventScreen(
         BrutalistTextField(value = location, onValueChange = { location = it }, placeholder = "e.g. Marine Drive")
 
         Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(text = "MAX VOLUNTEERS", fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(8.dp))
+        BrutalistTextField(value = maxVolunteers, onValueChange = { maxVolunteers = it }, placeholder = "e.g. 50")
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(text = "CAUSE", fontWeight = FontWeight.Bold, color = Color.Black)
         Spacer(modifier = Modifier.height(8.dp))
@@ -123,7 +130,8 @@ fun CreateEventScreen(
             BrutalistButton(
                 text = "SUBMIT EVENT",
                 onClick = { 
-                    viewModel.createEvent(title, description, date, cause, location, "My Organization") 
+                    val maxVols = maxVolunteers.toIntOrNull() ?: 0
+                    viewModel.createEvent(title, description, date, cause, location, "My Organization", maxVols) 
                 },
                 backgroundColor = Color(0xFFFAFF00), // Electric Yellow
                 modifier = Modifier.fillMaxWidth()

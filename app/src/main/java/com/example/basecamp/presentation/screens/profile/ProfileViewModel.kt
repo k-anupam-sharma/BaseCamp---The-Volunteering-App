@@ -3,6 +3,7 @@ package com.example.basecamp.presentation.screens.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.basecamp.domain.model.User
+import com.example.basecamp.domain.model.Ticket
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
@@ -30,6 +31,15 @@ class ProfileViewModel @Inject constructor(
     private val _updateState = MutableStateFlow<Boolean>(false)
     val updateState: StateFlow<Boolean> = _updateState.asStateFlow()
 
+    private val _rsvpCount = MutableStateFlow<Int>(0)
+    val rsvpCount: StateFlow<Int> = _rsvpCount.asStateFlow()
+
+    private val _logoutState = MutableStateFlow<Boolean>(false)
+    val logoutState: StateFlow<Boolean> = _logoutState.asStateFlow()
+
+    val currentUserId: String
+        get() = supabaseClient.auth.currentUserOrNull()?.id ?: "unknown"
+
     init {
         fetchProfile()
     }
@@ -42,6 +52,12 @@ class ProfileViewModel @Inject constructor(
                 val user = supabaseClient.postgrest["users"]
                     .select { filter { eq("id", userId) } }
                     .decodeSingle<User>()
+                    
+                val tickets = supabaseClient.postgrest["tickets"]
+                    .select { filter { eq("volunteer_id", userId) } }
+                    .decodeList<Ticket>()
+                    
+                _rsvpCount.value = tickets.size
                 _profileState.value = ProfileState.Success(user)
             } catch (e: Exception) {
                 _profileState.value = ProfileState.Error(e.message ?: "Failed to fetch profile")
@@ -92,6 +108,8 @@ class ProfileViewModel @Inject constructor(
                 supabaseClient.auth.signOut()
             } catch (e: Exception) {
                 // Ignore error on logout
+            } finally {
+                _logoutState.value = true
             }
         }
     }

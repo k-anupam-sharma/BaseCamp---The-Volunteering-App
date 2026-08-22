@@ -2,6 +2,8 @@ package com.example.basecamp.presentation.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -29,6 +31,8 @@ fun ProfileScreen(
 ) {
     val state by viewModel.profileState.collectAsState()
     val isUpdated by viewModel.updateState.collectAsState()
+    val isLoggedOut by viewModel.logoutState.collectAsState()
+    val rsvpCount by viewModel.rsvpCount.collectAsState()
 
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -47,6 +51,12 @@ fun ProfileScreen(
         if (isUpdated) {
             viewModel.resetUpdateState()
             onNavigateBack()
+        }
+    }
+
+    LaunchedEffect(isLoggedOut) {
+        if (isLoggedOut) {
+            onLogout()
         }
     }
 
@@ -77,6 +87,18 @@ fun ProfileScreen(
                 letterSpacing = 2.sp
             )
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        coil.compose.AsyncImage(
+            model = "https://api.dicebear.com/9.x/bottts-neutral/png?seed=${viewModel.currentUserId}",
+            contentDescription = "Large Profile Avatar",
+            modifier = Modifier
+                .size(120.dp)
+                .align(Alignment.CenterHorizontally)
+                .clip(CircleShape)
+                .background(Color.LightGray)
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -156,18 +178,6 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            BrutalistButton(
-                text = "LOGOUT",
-                onClick = {
-                    viewModel.logout()
-                    onLogout()
-                },
-                backgroundColor = Color.White,
-                textColor = Color(0xFFFF007F), // Pink for logout
-                modifier = Modifier.fillMaxWidth()
-            )
         } else if (state is ProfileState.Error) {
             Text(
                 text = (state as ProfileState.Error).message,
@@ -176,5 +186,18 @@ fun ProfileScreen(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
+
+        Spacer(modifier = Modifier.weight(1f, fill = false))
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        BrutalistButton(
+            text = "LOGOUT",
+            onClick = {
+                viewModel.logout()
+            },
+            backgroundColor = Color.White,
+            textColor = Color(0xFFFF007F), // Pink for logout
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

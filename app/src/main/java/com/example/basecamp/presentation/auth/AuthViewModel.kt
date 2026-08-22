@@ -62,7 +62,7 @@ class AuthViewModel @Inject constructor(
                 
                 _authState.value = AuthState.Success(user.role)
             } catch (e: Exception) {
-                _authState.value = AuthState.Error(e.message ?: "Login failed")
+                _authState.value = AuthState.Error(e.userFriendlyMessage("Login failed"))
             }
         }
     }
@@ -72,7 +72,7 @@ class AuthViewModel @Inject constructor(
             try {
                 supabaseClient.auth.signInWith(Google)
             } catch (e: Exception) {
-                _authState.value = AuthState.Error(e.message ?: "Google Sign-in failed")
+                _authState.value = AuthState.Error(e.userFriendlyMessage("Google Sign-in failed"))
             }
         }
     }
@@ -98,7 +98,7 @@ class AuthViewModel @Inject constructor(
                     _authState.value = AuthState.NeedsProfileSetup(userId, email, name)
                 }
             } catch (e: Exception) {
-                _authState.value = AuthState.Error(e.message ?: "Login failed")
+                _authState.value = AuthState.Error(e.userFriendlyMessage("Login failed"))
             }
         }
     }
@@ -118,7 +118,7 @@ class AuthViewModel @Inject constructor(
                 supabaseClient.postgrest["users"].insert(newUser)
                 _authState.value = AuthState.Success(role)
             } catch (e: Exception) {
-                _authState.value = AuthState.Error(e.message ?: "Failed to complete signup")
+                _authState.value = AuthState.Error(e.userFriendlyMessage("Failed to complete signup"))
             }
         }
     }
@@ -147,13 +147,18 @@ class AuthViewModel @Inject constructor(
                 
                 _authState.value = AuthState.Success(role)
             } catch (e: Exception) {
-                _authState.value = AuthState.Error(e.message ?: "Signup failed")
+                _authState.value = AuthState.Error(e.userFriendlyMessage("Signup failed"))
             }
         }
     }
 
     fun resetState() {
         _authState.value = AuthState.Idle
+    }
+
+    private fun Exception.userFriendlyMessage(default: String): String {
+        val msg = this.message ?: return default
+        return msg.substringBefore("URL:").substringBefore("HTTP request to").trim()
     }
 }
 

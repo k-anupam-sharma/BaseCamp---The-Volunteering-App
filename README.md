@@ -99,3 +99,88 @@ graph TD
     J --> K[Status updated to 'Attended']
     K --> L[App displays Electric Yellow Success Banner!]
 ```
+
+---
+
+## 🚀 Local Setup & Installation
+
+If you want to clone this repository and run BaseCamp locally, follow these steps to set up your environment and database!
+
+### 1. Supabase Backend Setup
+You will need a free [Supabase](https://supabase.com/) project to act as the backend.
+1. Create a new project in Supabase.
+2. Go to the **SQL Editor** and run the following queries to build your tables and set up security:
+
+```sql
+-- 1. Create Users Table
+create table public.users (
+  id uuid primary key references auth.users(id),
+  created_at timestamp with time zone default now(),
+  name text not null,
+  role text not null check (role in ('Volunteer', 'Organization')),
+  email text not null,
+  phone text,
+  website text
+);
+
+-- Enable RLS on users
+alter table public.users enable row level security;
+create policy "Users can view all users" on public.users for select using (true);
+create policy "Users can insert their own profile" on public.users for insert with check (auth.uid() = id);
+
+
+-- 2. Create Events Table
+create table public.events (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamp with time zone default now(),
+  org_id uuid not null references public.users(id),
+  title text not null,
+  description text,
+  cause text not null,
+  location text not null,
+  date text not null,
+  org_name text not null,
+  max_volunteers integer default 0
+);
+
+-- Enable RLS on events
+alter table public.events enable row level security;
+create policy "Anyone can view events" on public.events for select using (true);
+create policy "Organizations can create events" on public.events for insert with check (auth.uid() = org_id);
+create policy "Organizations can update their own events" on public.events for update using (auth.uid() = org_id);
+create policy "Organizations can delete their own events" on public.events for delete using (auth.uid() = org_id);
+
+
+-- 3. Create Tickets Table
+create table public.tickets (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamp with time zone default now(),
+  event_id uuid not null references public.events(id) on delete cascade,
+  volunteer_id uuid not null references public.users(id),
+  status text default 'Pending'
+);
+
+-- Enable RLS on tickets
+alter table public.tickets enable row level security;
+create policy "Anyone can view tickets" on public.tickets for select using (true);
+create policy "Volunteers can create tickets" on public.tickets for insert with check (auth.uid() = volunteer_id);
+create policy "Organizations can update ticket status" on public.tickets for update using (true);
+```
+
+### 2. Configure Local API Keys
+For security, Supabase keys are not checked into GitHub. You must add them to a `local.properties` file.
+
+1. Open the Android Studio project.
+2. In the root directory of the project, open (or create) the `local.properties` file.
+3. Go to your Supabase Project Settings -> **API**.
+4. Add your **Project URL** and **anon public key** to `local.properties` like this:
+
+```properties
+SUPABASE_URL="https://YOUR_PROJECT_ID.supabase.co"
+SUPABASE_ANON_KEY="YOUR_ANON_KEY"
+```
+
+*Note: Android Studio will automatically generate BuildConfig fields from these properties.*
+
+### 3. Gradle Distribution Note
+The `gradle/wrapper/gradle-wrapper.properties` has been updated to use a standard internet distribution url (`https://services.gradle.org/distributions/gradle-8.9-bin.zip`). If you were using a local `file:///` distribution URL, Android Studio should automatically download the standard version upon the first Gradle sync, ensuring the project builds cleanly for any contributor on GitHub!

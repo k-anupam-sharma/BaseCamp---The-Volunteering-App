@@ -13,5 +13,6 @@ data class Event(
     val cause: String,
     val location: String,
     val date: String,
-    @SerialName("org_name") val orgName: String
+    @SerialName("org_name") val orgName: String,
+    @SerialName("max_volunteers") val maxVolunteers: Int = 0
 )

@@ -84,6 +84,9 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:compose-auth:2.0.0")
     implementation("io.ktor:ktor-client-android:2.3.5")
 
+    // Coil (Image Loading)
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
     // CameraX
     val cameraxVersion = "1.3.0"
     implementation("androidx.camera:camera-core:$cameraxVersion")

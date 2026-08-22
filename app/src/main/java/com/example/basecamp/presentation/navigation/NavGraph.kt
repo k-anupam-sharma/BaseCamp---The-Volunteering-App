@@ -12,6 +12,7 @@ import com.example.basecamp.presentation.auth.SignupScreen
 import com.example.basecamp.presentation.auth.CompleteProfileScreen
 import com.example.basecamp.presentation.screens.profile.ProfileScreen
 import com.example.basecamp.presentation.screens.organization.OrgDashboardScreen
+import com.example.basecamp.presentation.screens.organization.CreateEventScreen
 import com.example.basecamp.presentation.screens.volunteer.VolunteerDashboardScreen
 
 sealed class Screen(val route: String) {
@@ -20,6 +21,7 @@ sealed class Screen(val route: String) {
     object VolunteerDashboard : Screen("volunteer_dashboard")
     object OrgDashboard : Screen("org_dashboard")
     object ScanTicket : Screen("scan_ticket")
+    object CreateEvent : Screen("create_event")
     object CompleteProfile : Screen("complete_profile/{userId}/{email}/{name}") {
         fun createRoute(userId: String, email: String, name: String) = "complete_profile/$userId/$email/$name"
     }
@@ -38,8 +40,10 @@ fun BaseCampNavGraph(
         composable(route = Screen.Login.route) {
             LoginScreen(
                 onNeedsProfileSetup = { userId, email, name ->
-                    val encodedEmail = java.net.URLEncoder.encode(email, "UTF-8")
-                    val encodedName = java.net.URLEncoder.encode(name, "UTF-8")
+                    val safeEmail = email.ifEmpty { "no-email" }
+                    val safeName = name.ifEmpty { "User" }
+                    val encodedEmail = java.net.URLEncoder.encode(safeEmail, "UTF-8")
+                    val encodedName = java.net.URLEncoder.encode(safeName, "UTF-8")
                     navController.navigate(Screen.CompleteProfile.createRoute(userId, encodedEmail, encodedName))
                 },
                 onNavigateToSignup = {
@@ -63,8 +67,10 @@ fun BaseCampNavGraph(
         composable(route = Screen.Signup.route) {
             SignupScreen(
                 onNeedsProfileSetup = { userId, email, name ->
-                    val encodedEmail = java.net.URLEncoder.encode(email, "UTF-8")
-                    val encodedName = java.net.URLEncoder.encode(name, "UTF-8")
+                    val safeEmail = email.ifEmpty { "no-email" }
+                    val safeName = name.ifEmpty { "User" }
+                    val encodedEmail = java.net.URLEncoder.encode(safeEmail, "UTF-8")
+                    val encodedName = java.net.URLEncoder.encode(safeName, "UTF-8")
                     navController.navigate(Screen.CompleteProfile.createRoute(userId, encodedEmail, encodedName))
                 },
                 onNavigateToLogin = {
@@ -122,13 +128,32 @@ fun BaseCampNavGraph(
 
         composable(route = Screen.OrgDashboard.route) {
             OrgDashboardScreen(
-                onNavigateToScan = { navController.navigate(Screen.ScanTicket.route) }
+                onNavigateToScan = { navController.navigate(Screen.ScanTicket.route) },
+                onNavigateToCreate = { navController.navigate(Screen.CreateEvent.route) },
+                onNavigateToProfile = { navController.navigate(Screen.Profile.route) }
+            )
+        }
+        
+        composable(route = Screen.CreateEvent.route) {
+            CreateEventScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         
         composable(route = Screen.ScanTicket.route) {
             com.example.basecamp.presentation.screens.organization.ScanTicketScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Screen.Profile.route) {
+            ProfileScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
     }
