@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.baseccamp"
+    namespace = "com.example.basecamp"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.baseccamp"
+        applicationId = "com.example.basecamp"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -80,3 +80,4 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
