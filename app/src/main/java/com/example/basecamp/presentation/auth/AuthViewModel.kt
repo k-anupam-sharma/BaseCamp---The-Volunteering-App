@@ -20,6 +20,7 @@ sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
     data class Success(val role: String) : AuthState()
+    data class NeedsProfileSetup(val userId: String, val email: String, val name: String) : AuthState()
     data class Error(val message: String) : AuthState()
 }
 
@@ -41,6 +42,27 @@ class AuthViewModel @Inject constructor(
                     }
                     else -> {}
                 }
+            }
+        }
+    }
+
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                supabaseClient.auth.signInWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+                
+                val userId = supabaseClient.auth.currentUserOrNull()?.id ?: throw Exception("User not found")
+                val user = supabaseClient.postgrest["users"]
+                    .select { filter { eq("id", userId) } }
+                    .decodeSingle<User>()
+                
+                _authState.value = AuthState.Success(user.role)
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Login failed")
             }
         }
     }
@@ -67,44 +89,36 @@ class AuthViewModel @Inject constructor(
                     .select { filter { eq("id", userId) } }
                     .decodeList<User>()
                 
-                val role = if (existingUserList.isNotEmpty()) {
-                    existingUserList.first().role
+                if (existingUserList.isNotEmpty()) {
+                    _authState.value = AuthState.Success(existingUserList.first().role)
                 } else {
-                    // New Google user, default to Volunteer
-                    val newUser = User(
-                        id = userId,
-                        name = supabaseClient.auth.currentUserOrNull()?.userMetadata?.get("full_name")?.toString() ?: "Volunteer",
-                        role = "Volunteer",
-                        email = supabaseClient.auth.currentUserOrNull()?.email ?: ""
-                    )
-                    supabaseClient.postgrest["users"].insert(newUser)
-                    "Volunteer"
+                    // New Google user, need profile setup
+                    val email = supabaseClient.auth.currentUserOrNull()?.email ?: ""
+                    val name = supabaseClient.auth.currentUserOrNull()?.userMetadata?.get("full_name")?.toString() ?: ""
+                    _authState.value = AuthState.NeedsProfileSetup(userId, email, name)
                 }
-                
-                _authState.value = AuthState.Success(role)
             } catch (e: Exception) {
-                _authState.value = AuthState.Error(e.message ?: "Google Login failed")
+                _authState.value = AuthState.Error(e.message ?: "Login failed")
             }
         }
     }
 
-    fun login(email: String, password: String) {
+    fun completeGoogleSignup(userId: String, email: String, name: String, role: String, phone: String, website: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
-                supabaseClient.auth.signInWith(Email) {
-                    this.email = email
-                    this.password = password
-                }
-                
-                val userId = supabaseClient.auth.currentUserOrNull()?.id ?: throw Exception("User not found")
-                val user = supabaseClient.postgrest["users"]
-                    .select { filter { eq("id", userId) } }
-                    .decodeSingle<User>()
-                
-                _authState.value = AuthState.Success(user.role)
+                val newUser = User(
+                    id = userId,
+                    name = name,
+                    email = email,
+                    role = role,
+                                        phone = if (role == "Organization") phone else null,
+                    website = if (role == "Organization") website else null
+                )
+                supabaseClient.postgrest["users"].insert(newUser)
+                _authState.value = AuthState.Success(role)
             } catch (e: Exception) {
-                _authState.value = AuthState.Error(e.message ?: "Login failed")
+                _authState.value = AuthState.Error(e.message ?: "Failed to complete signup")
             }
         }
     }

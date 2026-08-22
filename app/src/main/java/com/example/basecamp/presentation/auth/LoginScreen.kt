@@ -21,6 +21,7 @@ import com.example.basecamp.presentation.components.BrutalistTextField
 fun LoginScreen(
     onNavigateToSignup: () -> Unit,
     onLoginSuccess: (String) -> Unit,
+    onNeedsProfileSetup: (String, String, String) -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     var email by remember { mutableStateOf("") }
@@ -30,7 +31,11 @@ fun LoginScreen(
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
-            onLoginSuccess((authState as AuthState.Success).role)
+            val role = (authState as AuthState.Success).role
+            onLoginSuccess(role) // or onSignupSuccess
+        } else if (authState is AuthState.NeedsProfileSetup) {
+            val state = authState as AuthState.NeedsProfileSetup
+            onNeedsProfileSetup(state.userId, state.email, state.name)
         }
     }
 

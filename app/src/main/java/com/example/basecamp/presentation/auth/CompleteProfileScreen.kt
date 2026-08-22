@@ -2,8 +2,8 @@ package com.example.basecamp.presentation.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -17,47 +17,50 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.basecamp.presentation.components.BrutalistButton
 import com.example.basecamp.presentation.components.BrutalistTextField
 
+
 @Composable
-fun SignupScreen(
-    onNavigateToLogin: () -> Unit,
-    onSignupSuccess: (String) -> Unit,
-    onNeedsProfileSetup: (String, String, String) -> Unit,
+fun CompleteProfileScreen(
+    userId: String,
+    initialEmail: String,
+    initialName: String,
+    onSetupSuccess: (String) -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    var name by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf("Volunteer") }
+    var name by remember { mutableStateOf(initialName) }
     var phone by remember { mutableStateOf("") }
     var website by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf("Volunteer") } // "Volunteer" or "Organization"
 
     val authState by viewModel.authState.collectAsState()
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
-            val role = (authState as AuthState.Success).role
-            onSignupSuccess(role) // or onSignupSuccess
-        } else if (authState is AuthState.NeedsProfileSetup) {
-            val state = authState as AuthState.NeedsProfileSetup
-            onNeedsProfileSetup(state.userId, state.email, state.name)
+            onSetupSuccess((authState as AuthState.Success).role)
         }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .background(Color(0xFFF4F4F0))
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "JOIN BASECAMP",
-            fontSize = 36.sp,
+            text = "ALMOST THERE",
+            fontSize = 32.sp,
             fontWeight = FontWeight.ExtraBold,
             color = Color.Black,
-            letterSpacing = 1.sp
+            letterSpacing = 2.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "COMPLETE YOUR PROFILE",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -75,18 +78,18 @@ fun SignupScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            val volColor = if (selectedRole == "Volunteer") Color(0xFFFAFF00) else Color.White
-            val orgColor = if (selectedRole == "Organization") Color(0xFFFAFF00) else Color.White
+            val volColor = if (role == "Volunteer") Color(0xFFFAFF00) else Color.White
+            val orgColor = if (role == "Organization") Color(0xFFFAFF00) else Color.White
 
             BrutalistButton(
                 text = "VOLUNTEER",
-                onClick = { selectedRole = "Volunteer" },
+                onClick = { role = "Volunteer" },
                 backgroundColor = volColor,
                 modifier = Modifier.weight(1f)
             )
             BrutalistButton(
                 text = "ORGANIZATION",
-                onClick = { selectedRole = "Organization" },
+                onClick = { role = "Organization" },
                 backgroundColor = orgColor,
                 modifier = Modifier.weight(1f)
             )
@@ -94,13 +97,12 @@ fun SignupScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        if (selectedRole == "Volunteer") {
+        if (role == "Volunteer") {
             BrutalistTextField(
                 value = name,
                 onValueChange = { name = it },
                 placeholder = "FULL NAME"
             )
-            Spacer(modifier = Modifier.height(16.dp))
         } else {
             BrutalistTextField(
                 value = name,
@@ -111,7 +113,7 @@ fun SignupScreen(
             BrutalistTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                placeholder = "PHONE NUMBER (OPTIONAL)"
+                placeholder = "PHONE NUMBER"
             )
             Spacer(modifier = Modifier.height(16.dp))
             BrutalistTextField(
@@ -119,45 +121,25 @@ fun SignupScreen(
                 onValueChange = { website = it },
                 placeholder = "WEBSITE (OPTIONAL)"
             )
-            Spacer(modifier = Modifier.height(16.dp))
         }
-
-        BrutalistTextField(
-            value = email,
-            onValueChange = { email = it },
-            placeholder = "EMAIL ADDRESS"
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        BrutalistTextField(
-            value = password,
-            onValueChange = { password = it },
-            placeholder = "PASSWORD",
-            isPassword = true
-        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         if (authState is AuthState.Loading) {
             CircularProgressIndicator(color = Color.Black)
         } else {
-            
-
             BrutalistButton(
-                text = "SIGN UP",
-                onClick = { viewModel.signup(name, email, password, selectedRole, phone.takeIf { selectedRole == "Organization" }, website.takeIf { selectedRole == "Organization" }) },
-                backgroundColor = Color(0xFF00E5FF), // Bright Cyan for primary action
-                modifier = Modifier.fillMaxWidth()
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            BrutalistButton(
-                text = "CONTINUE WITH GOOGLE",
-                onClick = { viewModel.loginWithGoogle() },
-                backgroundColor = Color.White,
-                textColor = Color.Black,
+                text = "FINISH ACCOUNT CREATION",
+                onClick = {
+                    viewModel.completeGoogleSignup(
+                        userId = userId,
+                        email = initialEmail,
+                        name = name,
+                        role = role,
+                                                phone = phone,
+                        website = website
+                    )
+                },
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -166,21 +148,9 @@ fun SignupScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = (authState as AuthState.Error).message,
-                color = Color(0xFFFF007F), // Hot Pink
+                color = Color(0xFFFF007F), // Hot Pink for errors
                 fontWeight = FontWeight.Bold
             )
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        BrutalistButton(
-            text = "BACK TO LOGIN",
-            onClick = onNavigateToLogin,
-            backgroundColor = Color.White,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
-
-
-

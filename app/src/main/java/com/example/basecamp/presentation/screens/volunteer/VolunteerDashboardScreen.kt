@@ -6,6 +6,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,6 +26,7 @@ import com.example.basecamp.presentation.components.BrutalistCard
 
 @Composable
 fun VolunteerDashboardScreen(
+    onNavigateToProfile: () -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val feedState by viewModel.feedState.collectAsState()
@@ -32,14 +37,27 @@ fun VolunteerDashboardScreen(
             .background(Color(0xFFF4F4F0))
             .padding(16.dp)
     ) {
-        Text(
-            text = "EVENT FEED",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color.Black,
-            letterSpacing = 1.sp,
-            modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp, top = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "EVENT FEED",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Black,
+                letterSpacing = 1.sp
+            )
+            IconButton(onClick = onNavigateToProfile) {
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = "Profile",
+                    tint = Color.Black,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
 
         when (feedState) {
             is FeedState.Loading -> {
