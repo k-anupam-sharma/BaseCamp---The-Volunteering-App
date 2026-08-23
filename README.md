@@ -18,20 +18,20 @@ BaseCamp was created to fix this fragmentation. We provide a centralized, common
 
 ---
 
-## ⚙️ How Does It Work?
-
-BaseCamp operates on a dual-role system:
+## ⚙️ Key Features
 
 ### For Volunteers 🤝
-1. **Discover**: Browse a real-time feed of local events categorized by cause (Environment, Health, Education, etc.).
-2. **RSVP & Ticketing**: RSVP with a single tap. The app instantly generates a unique **QR Code Ticket** containing your secure payload.
-3. **Check-In**: Show your digital ticket at the event to be scanned.
-4. **Gamification**: Post-event, watch your "Total Hours" climb and unlock achievement badges on your Volunteer Dossier.
+1. **Discover**: Browse a real-time, auto-refreshing feed of local events categorized by cause.
+2. **Secure Ticketing**: RSVP with a single tap. The app generates a **Secure QR Code Ticket** that is blurred by default. Tapping it starts a 15-second interactive reveal timer.
+3. **Two-Step Check-In**: Show your ticket to be scanned twice (Login and Logout). The app actively polls the server and instantly updates your status and displays your **total logged duration**.
+4. **Gamification**: Watch your "Total Hours" climb and unlock achievement badges on your Volunteer Dossier.
+5. **Interactive Chat**: Engage with other volunteers and organizers in the real-time event chat.
 
 ### For Organizations 🏢
-1. **Event Creation**: Use brutalist forms to easily spin up new community events.
+1. **Event Management**: Create, delete, and dynamically increase capacity for community events.
 2. **Hardware Scanning**: Access the built-in CameraX scanner to scan volunteer QR tickets at the door.
-3. **Real-time Sync**: Scanned tickets instantly update the volunteer's RSVP status to "Attended" in the Supabase backend.
+3. **Real-time Live Sync**: The "Volunteers" tab auto-refreshes every 10 seconds. When you scan a ticket, it instantly registers the volunteer's check-in/check-out time and automatically calculates their volunteering duration.
+4. **Organizer Badges**: Chat directly with volunteers in the event thread—your messages are highlighted with an exclusive "ORGANIZER" badge.
 
 ---
 
@@ -81,23 +81,17 @@ sequenceDiagram
     App-->>User: Navigate to Dashboard based on Role
 ```
 
-### 3. The Ticketing & Hardware Scanning Flow
+### 3. The 2-Step Ticketing & Hardware Scanning Flow
 ```mermaid
 graph TD
-    A[Volunteer RSVPs] --> B[App Generates QR Code using Zxing]
-    B --> C{QR Payload: eventId, volunteerId}
-    C --> D[Volunteer presents QR at event]
-    
-    E[Org opens ScanTicketScreen] --> F[CameraX feed activates]
-    F --> G[QrAnalyzer intercepts frames]
-    G --> H[Zxing decodes JSON payload]
-    
-    D -.->|Scans| H
-    
-    H --> I[OrgViewModel sends Update to Supabase]
-    I --> J[(Supabase 'RSVPs' Table)]
-    J --> K[Status updated to 'Attended']
-    K --> L[App displays Electric Yellow Success Banner!]
+    A[Volunteer unblurs QR] --> B[App starts 15s timer & 3s Polling]
+    C[Org opens ScanTicketScreen] --> D[CameraX intercepts QR]
+    D --> E[OrgViewModel pushes timestamp to Supabase]
+    E --> F{1st or 2nd Scan?}
+    F -->|1st Scan| G[Ticket Status: 'Checked In']
+    F -->|2nd Scan| H[Ticket Status: 'Attended' + Duration Calculated]
+    G -.->|Auto-Refresh| B
+    H -.->|Auto-Refresh| B
 ```
 
 ---
@@ -123,12 +117,6 @@ create table public.users (
   website text
 );
 
--- Enable RLS on users
-alter table public.users enable row level security;
-create policy "Users can view all users" on public.users for select using (true);
-create policy "Users can insert their own profile" on public.users for insert with check (auth.uid() = id);
-
-
 -- 2. Create Events Table
 create table public.events (
   id uuid primary key default gen_random_uuid(),
@@ -143,28 +131,35 @@ create table public.events (
   max_volunteers integer default 0
 );
 
--- Enable RLS on events
-alter table public.events enable row level security;
-create policy "Anyone can view events" on public.events for select using (true);
-create policy "Organizations can create events" on public.events for insert with check (auth.uid() = org_id);
-create policy "Organizations can update their own events" on public.events for update using (auth.uid() = org_id);
-create policy "Organizations can delete their own events" on public.events for delete using (auth.uid() = org_id);
-
-
 -- 3. Create Tickets Table
 create table public.tickets (
   id uuid primary key default gen_random_uuid(),
   created_at timestamp with time zone default now(),
   event_id uuid not null references public.events(id) on delete cascade,
   volunteer_id uuid not null references public.users(id),
-  status text default 'Pending'
+  status text default 'Pending',
+  check_in_time text,
+  check_out_time text
 );
 
--- Enable RLS on tickets
-alter table public.tickets enable row level security;
-create policy "Anyone can view tickets" on public.tickets for select using (true);
-create policy "Volunteers can create tickets" on public.tickets for insert with check (auth.uid() = volunteer_id);
-create policy "Organizations can update ticket status" on public.tickets for update using (true);
+-- 4. Create Comments Table
+create table public.comments (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamp with time zone default now(),
+  event_id uuid not null references public.events(id) on delete cascade,
+  user_id uuid not null references public.users(id),
+  parent_id uuid references public.comments(id) on delete cascade,
+  text text not null
+);
+
+-- 5. Create Comment Likes Table
+create table public.comment_likes (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamp with time zone default now(),
+  comment_id uuid not null references public.comments(id) on delete cascade,
+  user_id uuid not null references public.users(id),
+  unique(comment_id, user_id)
+);
 ```
 
 ### 2. Configure Local API Keys
@@ -177,7 +172,7 @@ For security, Supabase keys are not checked into GitHub. You must add them to a 
 
 ```properties
 SUPABASE_URL="https://YOUR_PROJECT_ID.supabase.co"
-SUPABASE_ANON_KEY="YOUR_ANON_KEY"
+SUPABASE_KEY="YOUR_ANON_KEY"
 ```
 
 *Note: Android Studio will automatically generate BuildConfig fields from these properties.*
