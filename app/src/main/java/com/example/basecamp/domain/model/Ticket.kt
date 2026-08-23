@@ -9,5 +9,7 @@ data class Ticket(
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("event_id") val eventId: String,
     @SerialName("volunteer_id") val volunteerId: String,
-    val status: String = "Pending"
+    val status: String = "Pending",
+    @SerialName("check_in_time") val checkInTime: String? = null,
+    @SerialName("check_out_time") val checkOutTime: String? = null
 )

@@ -1,182 +1,336 @@
 package com.example.basecamp.presentation.screens.volunteer
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.basecamp.domain.model.Event
-import com.example.basecamp.presentation.components.BrutalistButton
 import com.example.basecamp.presentation.components.BrutalistCard
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.qrcode.QRCodeWriter
+import com.example.basecamp.utils.QrCodeGenerator
 import org.json.JSONObject
+import com.example.basecamp.presentation.screens.shared.EventChatSection
+import com.example.basecamp.presentation.screens.shared.EventChatViewModel
+import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventDetailsScreen(
-    event: Event,
-    volunteerId: String,
-    onNavigateBack: () -> Unit
+    eventId: String,
+    onNavigateBack: () -> Unit,
+    viewModel: FeedViewModel = hiltViewModel(),
+    chatViewModel: EventChatViewModel = hiltViewModel()
 ) {
-    var isRsvped by remember { mutableStateOf(false) }
-    var showTicketDialog by remember { mutableStateOf(false) }
+    val feedState by viewModel.feedState.collectAsState()
+    var event by remember { mutableStateOf<Event?>(null) }
+    
+    val currentUserId = viewModel.currentUserId
+
+    var selectedTab by remember { mutableStateOf(0) }
+    val chatState by chatViewModel.chatState.collectAsState()
+
+    LaunchedEffect(feedState, eventId) {
+        if (feedState is FeedState.Success) {
+            val allEvents = (feedState as FeedState.Success).availableEvents + (feedState as FeedState.Success).rsvpedEvents
+            event = allEvents.find { it.id == eventId }
+        }
+    }
+
+    LaunchedEffect(eventId, selectedTab) {
+        if (selectedTab == 1) {
+            chatViewModel.loadComments(eventId)
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF4F4F0))
-            .padding(24.dp)
+            .padding(16.dp)
     ) {
-        BrutalistButton(
-            text = "BACK",
-            onClick = onNavigateBack,
-            backgroundColor = Color.White
-        )
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        BrutalistCard(
-            modifier = Modifier.fillMaxWidth(),
-            backgroundColor = Color.White
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = event.title.uppercase(),
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.Black
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(text = "ORG: ${event.orgName}", fontWeight = FontWeight.Bold, color = Color.DarkGray)
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Text(text = "CAUSE: ${event.cause}", fontWeight = FontWeight.Bold, color = Color(0xFFFF007F))
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Text(text = "📍 ${event.location}", fontWeight = FontWeight.Medium)
-                Text(text = "🗓 ${event.date}", fontWeight = FontWeight.Medium)
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(text = event.description, fontWeight = FontWeight.Medium)
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                if (!isRsvped) {
-                    BrutalistButton(
-                        text = "RSVP NOW",
-                        onClick = { isRsvped = true },
-                        backgroundColor = Color(0xFFFAFF00), // Electric Yellow
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                } else {
-                    BrutalistButton(
-                        text = "SHOW TICKET",
-                        onClick = { showTicketDialog = true },
-                        backgroundColor = Color(0xFF00E5FF), // Cyan for ticket
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
+        IconButton(onClick = onNavigateBack) {
+            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
         }
-    }
+        
+        Spacer(modifier = Modifier.height(16.dp))
 
-    if (showTicketDialog) {
-        Dialog(onDismissRequest = { showTicketDialog = false }) {
-            BrutalistCard(
-                backgroundColor = Color.White,
-                modifier = Modifier.padding(16.dp)
+        if (event == null) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color.Black)
+            }
+        } else {
+            val validEvent = event!!
+            
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = Color.Transparent,
+                contentColor = Color.Black,
+                indicator = { tabPositions ->
+                    if (selectedTab < tabPositions.size) {
+                        SecondaryIndicator(
+                            Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                            color = Color(0xFFFF007F), // Hot Pink
+                            height = 4.dp
+                        )
+                    }
+                }
             ) {
+                Tab(
+                    selected = selectedTab == 0,
+                    onClick = { selectedTab = 0 },
+                    text = { Text("TICKET & DETAILS", fontWeight = FontWeight.ExtraBold) }
+                )
+                Tab(
+                    selected = selectedTab == 1,
+                    onClick = { selectedTab = 1 },
+                    text = { Text("CHAT", fontWeight = FontWeight.ExtraBold) }
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (selectedTab == 0) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
                 ) {
+                    // Top section: QR Code Ticket
+                    BrutalistCard(
+                        backgroundColor = Color.White,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "YOUR TICKET",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.Black
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            val payload = JSONObject().apply {
+                                put("eventId", validEvent.id)
+                                put("volunteerId", currentUserId)
+                            }.toString()
+                            
+                            val qrBitmap = remember(payload) {
+                                QrCodeGenerator.generateQrCode(payload)
+                            }
+                            
+                            val myTickets by viewModel.myTickets.collectAsState()
+                            val myTicket = myTickets.find { it.eventId == eventId }
+
+                            var isQrRevealed by remember { mutableStateOf(false) }
+                            var qrTimeRemaining by remember { mutableStateOf(15) }
+
+                            LaunchedEffect(isQrRevealed) {
+                                if (isQrRevealed) {
+                                    qrTimeRemaining = 15
+                                    while (qrTimeRemaining > 0) {
+                                        kotlinx.coroutines.delay(1000)
+                                        qrTimeRemaining -= 1
+                                        if (qrTimeRemaining % 3 == 0) {
+                                            viewModel.fetchEvents(showLoading = false)
+                                        }
+                                    }
+                                    isQrRevealed = false
+                                }
+                            }
+
+                            if (myTicket?.status != "Attended") {
+                                Box(
+                                    modifier = Modifier
+                                        .size(200.dp)
+                                        .clickable { if (!isQrRevealed) isQrRevealed = true },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        bitmap = qrBitmap.asImageBitmap(),
+                                        contentDescription = "QR Code",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .blur(if (isQrRevealed) 0.dp else 16.dp)
+                                    )
+                                    if (!isQrRevealed) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(Color.White.copy(alpha = 0.5f)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "TAP TO REVEAL",
+                                                fontWeight = FontWeight.Black,
+                                                fontSize = 18.sp,
+                                                color = Color.Black
+                                            )
+                                        }
+                                    } else {
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.BottomCenter)
+                                                .background(Color.Black.copy(alpha = 0.7f))
+                                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        ) {
+                                            Text(
+                                                text = "${qrTimeRemaining}s",
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    text = "ATTENDED",
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color(0xFF00FF00) // Green
+                                )
+                            }
+                            
+                            if (myTicket != null) {
+                                Spacer(modifier = Modifier.height(24.dp))
+                                val statusColor = when (myTicket.status) {
+                                    "Checked In" -> Color(0xFFFAFF00)
+                                    "Attended" -> Color(0xFF00FF00)
+                                    else -> Color.LightGray
+                                }
+                                
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(modifier = Modifier.size(16.dp).background(statusColor))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "STATUS: ${myTicket.status.uppercase()}",
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 18.sp
+                                    )
+                                }
+                                
+                                if (myTicket.status == "Checked In" && myTicket.checkInTime != null) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    var timeStr: String? = null
+                                    try {
+                                        val checkInInstant = java.time.Instant.parse(myTicket.checkInTime)
+                                        val localTime = java.time.LocalDateTime.ofInstant(checkInInstant, java.time.ZoneId.systemDefault())
+                                        timeStr = java.time.format.DateTimeFormatter.ofPattern("hh:mm a").format(localTime)
+                                    } catch (e: Exception) {}
+                                    
+                                    if (timeStr != null) {
+                                        Text(
+                                            text = "CHECKED IN AT: $timeStr",
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.DarkGray
+                                        )
+                                    }
+                                } else if (myTicket.status == "Attended" && myTicket.checkInTime != null && myTicket.checkOutTime != null) {
+                                    var durationStr: String? = null
+                                    try {
+                                        val checkIn = java.time.Instant.parse(myTicket.checkInTime)
+                                        val checkOut = java.time.Instant.parse(myTicket.checkOutTime)
+                                        val durationMinutes = java.time.Duration.between(checkIn, checkOut).toMinutes()
+                                        val hours = durationMinutes / 60
+                                        val mins = durationMinutes % 60
+                                        durationStr = "${hours}h ${mins}m"
+                                    } catch (e: Exception) {}
+                                    
+                                    if (durationStr != null) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = "TOTAL DURATION: $durationStr",
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = Color(0xFFFF007F) // Hot Pink
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Bottom section: Event Details
                     Text(
-                        text = "YOUR TICKET",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        text = validEvent.title.uppercase(),
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Black,
                         color = Color.Black
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Scan at the event",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
+                        text = "BY ${validEvent.orgName.uppercase()}",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
                         color = Color.DarkGray
                     )
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
-                    // Generate QR Code containing eventId and volunteerId
-                    val qrData = JSONObject().apply {
-                        put("eventId", event.id)
-                        put("volunteerId", volunteerId)
-                    }.toString()
+                    DetailItem(label = "DESCRIPTION", value = validEvent.description)
+                    DetailItem(label = "DATE & TIME", value = validEvent.date)
+                    DetailItem(label = "LOCATION", value = validEvent.location)
+                    DetailItem(label = "CAUSE", value = validEvent.cause)
                     
-                    val qrBitmap = generateQrCode(qrData, 512)
-                    
-                    if (qrBitmap != null) {
-                        Image(
-                            bitmap = qrBitmap.asImageBitmap(),
-                            contentDescription = "QR Code Ticket",
-                            modifier = Modifier.size(200.dp)
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .size(200.dp)
-                                .background(Color.LightGray),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("QR Code Error")
-                        }
-                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider(color = Color.Black, thickness = 2.dp)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    DetailItem(label = "TYPE OF WORK", value = validEvent.typeOfWork.ifBlank { "Not specified" })
+                    DetailItem(label = "PAYMENT / PERKS", value = validEvent.payment.ifBlank { "Not specified" })
+                    DetailItem(label = "DRESS CODE", value = validEvent.dressCode.ifBlank { "Not specified" })
+                    DetailItem(label = "CONTACT DETAILS", value = validEvent.contactDetails.ifBlank { "Not specified" })
                     
                     Spacer(modifier = Modifier.height(32.dp))
-                    
-                    BrutalistButton(
-                        text = "CLOSE",
-                        onClick = { showTicketDialog = false },
-                        backgroundColor = Color.White,
-                        modifier = Modifier.fillMaxWidth()
-                    )
                 }
+            } else {
+                EventChatSection(
+                    chatState = chatState,
+                    eventOwnerId = validEvent.orgId,
+                    onAddComment = { text, parentId ->
+                        chatViewModel.addComment(eventId, text, parentId)
+                    },
+                    onToggleLike = { commentId ->
+                        chatViewModel.toggleLike(commentId)
+                    },
+                    onRefresh = {
+                        chatViewModel.loadComments(eventId)
+                    }
+                )
             }
         }
     }
 }
 
-// Helper function using ZXing Core to generate QR Code Bitmap
-fun generateQrCode(content: String, size: Int): Bitmap? {
-    return try {
-        val writer = QRCodeWriter()
-        val bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, size, size)
-        val width = bitMatrix.width
-        val height = bitMatrix.height
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                bitmap.setPixel(x, y, if (bitMatrix.get(x, y)) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
-            }
-        }
-        bitmap
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
+@Composable
+fun DetailItem(label: String, value: String) {
+    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFFFF007F) // Hot Pink
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = value,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black
+        )
     }
 }
-
-

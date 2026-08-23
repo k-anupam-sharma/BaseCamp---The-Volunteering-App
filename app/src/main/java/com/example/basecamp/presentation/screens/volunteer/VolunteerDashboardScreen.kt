@@ -33,15 +33,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.basecamp.domain.model.Event
 import com.example.basecamp.presentation.components.BrutalistButton
 import com.example.basecamp.presentation.components.BrutalistCard
-import androidx.compose.ui.window.Dialog
-import androidx.compose.foundation.Image
-import androidx.compose.ui.graphics.asImageBitmap
-import com.example.basecamp.utils.QrCodeGenerator
-import org.json.JSONObject
 
 @Composable
 fun VolunteerDashboardScreen(
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToEventDetails: (String) -> Unit,
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val feedState by viewModel.feedState.collectAsState()
@@ -50,7 +46,6 @@ fun VolunteerDashboardScreen(
     val attendedCount by viewModel.attendedCount.collectAsState()
 
     var selectedTab by remember { mutableStateOf("ALL") }
-    var selectedEventForQr by remember { mutableStateOf<Event?>(null) }
 
     val context = LocalContext.current
 
@@ -65,6 +60,13 @@ fun VolunteerDashboardScreen(
                 viewModel.resetRsvpState()
             }
             else -> {}
+        }
+    }
+    
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(20_000)
+            viewModel.fetchEvents(showLoading = false)
         }
     }
 
@@ -103,7 +105,7 @@ fun VolunteerDashboardScreen(
                 .padding(16.dp)
         ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp, top = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp, top = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -112,7 +114,7 @@ fun VolunteerDashboardScreen(
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Black,
-                letterSpacing = 2.sp
+                letterSpacing = 1.sp
             )
             IconButton(onClick = onNavigateToProfile) {
                 coil.compose.AsyncImage(
@@ -120,8 +122,26 @@ fun VolunteerDashboardScreen(
                     contentDescription = "Profile Avatar",
                     modifier = Modifier
                         .size(40.dp)
-                        .clip(CircleShape)
+                        .clip(androidx.compose.foundation.shape.CircleShape)
                         .background(Color.LightGray)
+                )
+            }
+        }
+        
+        // Attended Count Header
+        BrutalistCard(
+            backgroundColor = Color(0xFF00E5FF), // Cyan
+            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "EVENTS ATTENDED: $attendedCount",
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    color = Color.Black
                 )
             }
         }
@@ -160,7 +180,7 @@ fun VolunteerDashboardScreen(
                                 },
                                 onShowQrClick = {
                                     if (isRsvped) {
-                                        selectedEventForQr = event
+                                        event.id?.let { onNavigateToEventDetails(it) }
                                     }
                                 }
                             )
@@ -174,74 +194,6 @@ fun VolunteerDashboardScreen(
                         text = (feedState as FeedState.Error).message,
                         color = Color(0xFFFF007F), // Hot Pink
                         fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-    }
-    
-    selectedEventForQr?.let { event ->
-        Dialog(onDismissRequest = { selectedEventForQr = null }) {
-            BrutalistCard(
-                backgroundColor = Color.White,
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "YOUR TICKET",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    val payload = JSONObject().apply {
-                        put("eventId", event.id)
-                        put("volunteerId", viewModel.currentUserId)
-                    }.toString()
-                    
-                    val qrBitmap = remember(payload) {
-                        QrCodeGenerator.generateQrCode(payload)
-                    }
-                    
-                    Image(
-                        bitmap = qrBitmap.asImageBitmap(),
-                        contentDescription = "QR Code",
-                        modifier = Modifier.size(200.dp)
-                    )
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = event.title.uppercase(),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.Black,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = event.orgName,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.DarkGray
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "🗓 ${event.date}",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFF007F) // Hot Pink
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    BrutalistButton(
-                        text = "CLOSE",
-                        onClick = { selectedEventForQr = null },
-                        backgroundColor = Color(0xFFFAFF00), // Electric Yellow
-                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -298,7 +250,7 @@ fun EventCard(event: Event, isRsvped: Boolean, onRsvpClick: () -> Unit, onShowQr
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "RSVP'D - TAP FOR TICKET",
+                        text = "RSVP'D - TAP FOR DETAILS & TICKET",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.DarkGray

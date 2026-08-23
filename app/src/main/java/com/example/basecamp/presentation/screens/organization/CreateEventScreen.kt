@@ -29,6 +29,12 @@ fun CreateEventScreen(
     var cause by remember { mutableStateOf("") }
     var maxVolunteers by remember { mutableStateOf("") }
     
+    // New Advanced Fields
+    var typeOfWork by remember { mutableStateOf("") }
+    var payment by remember { mutableStateOf("") }
+    var dressCode by remember { mutableStateOf("") }
+    var contactDetails by remember { mutableStateOf("") }
+    
     val causes = listOf("Environment", "Education", "Health", "Community", "Other")
     var expanded by remember { mutableStateOf(false) }
 
@@ -88,6 +94,30 @@ fun CreateEventScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        Text(text = "TYPE OF WORK", fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(8.dp))
+        BrutalistTextField(value = typeOfWork, onValueChange = { typeOfWork = it }, placeholder = "e.g. Physical labor, Teaching")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "PAYMENT / PERKS", fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(8.dp))
+        BrutalistTextField(value = payment, onValueChange = { payment = it }, placeholder = "e.g. Unpaid, Free Lunch")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "DRESS CODE", fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(8.dp))
+        BrutalistTextField(value = dressCode, onValueChange = { dressCode = it }, placeholder = "e.g. Casual, Closed-toe shoes")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "CONTACT DETAILS", fontWeight = FontWeight.Bold, color = Color.Black)
+        Spacer(modifier = Modifier.height(8.dp))
+        BrutalistTextField(value = contactDetails, onValueChange = { contactDetails = it }, placeholder = "e.g. +91 9876543210")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(text = "CAUSE", fontWeight = FontWeight.Bold, color = Color.Black)
         Spacer(modifier = Modifier.height(8.dp))
         
@@ -131,7 +161,10 @@ fun CreateEventScreen(
                 text = "SUBMIT EVENT",
                 onClick = { 
                     val maxVols = maxVolunteers.toIntOrNull() ?: 0
-                    viewModel.createEvent(title, description, date, cause, location, "My Organization", maxVols) 
+                    viewModel.createEvent(
+                        title, description, date, cause, location, "My Organization", maxVols,
+                        typeOfWork, payment, dressCode, contactDetails
+                    ) 
                 },
                 backgroundColor = Color(0xFFFAFF00), // Electric Yellow
                 modifier = Modifier.fillMaxWidth()

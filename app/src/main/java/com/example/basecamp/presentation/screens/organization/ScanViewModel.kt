@@ -16,7 +16,7 @@ sealed class ScanState {
     object Idle : ScanState()
     object Scanning : ScanState()
     object Loading : ScanState()
-    data class Success(val volunteerId: String) : ScanState()
+    data class Success(val message: String) : ScanState()
     data class Error(val message: String) : ScanState()
 }
 
@@ -40,19 +40,53 @@ class ScanViewModel @Inject constructor(
                 val eventId = json.getString("eventId")
                 val volunteerId = json.getString("volunteerId")
 
-                // Update tickets table in Supabase
-                supabaseClient.postgrest["tickets"].update(
-                    {
-                        set("status", "Attended")
-                    }
-                ) {
+                // 1. Fetch the ticket
+                val ticket = supabaseClient.postgrest["tickets"].select {
                     filter {
                         eq("event_id", eventId)
                         eq("volunteer_id", volunteerId)
                     }
+                }.decodeSingleOrNull<com.example.basecamp.domain.model.Ticket>()
+
+                if (ticket == null) {
+                    _scanState.value = ScanState.Error("No RSVP found for this volunteer")
+                    return@launch
                 }
 
-                _scanState.value = ScanState.Success(volunteerId)
+                val nowIso = java.time.Instant.now().toString()
+
+                if (ticket.checkInTime == null) {
+                    // 2. 1st Scan -> Login (Check-in)
+                    supabaseClient.postgrest["tickets"].update(
+                        {
+                            set("status", "Checked In")
+                            set("check_in_time", nowIso)
+                        }
+                    ) {
+                        filter {
+                            eq("event_id", eventId)
+                            eq("volunteer_id", volunteerId)
+                        }
+                    }
+                    _scanState.value = ScanState.Success("Logged In!")
+                } else if (ticket.checkOutTime == null) {
+                    // 3. 2nd Scan -> Logout (Check-out)
+                    supabaseClient.postgrest["tickets"].update(
+                        {
+                            set("status", "Attended")
+                            set("check_out_time", nowIso)
+                        }
+                    ) {
+                        filter {
+                            eq("event_id", eventId)
+                            eq("volunteer_id", volunteerId)
+                        }
+                    }
+                    _scanState.value = ScanState.Success("Logged Out!")
+                } else {
+                    // 4. Already completed both scans
+                    _scanState.value = ScanState.Error("Volunteer has already logged out")
+                }
             } catch (e: Exception) {
                 _scanState.value = ScanState.Error("Invalid QR or Update Failed")
             }

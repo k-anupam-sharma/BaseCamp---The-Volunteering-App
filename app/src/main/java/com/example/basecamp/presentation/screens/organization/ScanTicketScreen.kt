@@ -146,6 +146,7 @@ fun ScanTicketScreen(
                     }
                 }
                 is ScanState.Success -> {
+                    val message = (scanState as ScanState.Success).message
                     // Massive Bright Electric Yellow brutalist success banner
                     BrutalistCard(
                         backgroundColor = Color(0xFFFAFF00),
@@ -156,14 +157,14 @@ fun ScanTicketScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "ATTENDED!",
+                                text = "SUCCESS!",
                                 fontSize = 48.sp,
                                 fontWeight = FontWeight.Black,
                                 color = Color.Black
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "Volunteer checked in.",
+                                text = message,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.DarkGray

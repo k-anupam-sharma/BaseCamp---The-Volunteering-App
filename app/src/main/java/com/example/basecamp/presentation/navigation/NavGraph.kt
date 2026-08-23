@@ -14,6 +14,8 @@ import com.example.basecamp.presentation.screens.profile.ProfileScreen
 import com.example.basecamp.presentation.screens.organization.OrgDashboardScreen
 import com.example.basecamp.presentation.screens.organization.CreateEventScreen
 import com.example.basecamp.presentation.screens.volunteer.VolunteerDashboardScreen
+import com.example.basecamp.presentation.screens.volunteer.EventDetailsScreen
+import com.example.basecamp.presentation.screens.organization.OrgEventDetailsScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -22,6 +24,12 @@ sealed class Screen(val route: String) {
     object OrgDashboard : Screen("org_dashboard")
     object ScanTicket : Screen("scan_ticket")
     object CreateEvent : Screen("create_event")
+    object EventDetails : Screen("event_details/{eventId}") {
+        fun createRoute(eventId: String) = "event_details/$eventId"
+    }
+    object OrgEventDetails : Screen("org_event_details/{eventId}") {
+        fun createRoute(eventId: String) = "org_event_details/$eventId"
+    }
     object CompleteProfile : Screen("complete_profile/{userId}/{email}/{name}") {
         fun createRoute(userId: String, email: String, name: String) = "complete_profile/$userId/$email/$name"
     }
@@ -123,14 +131,40 @@ fun BaseCampNavGraph(
         }
 
         composable(route = Screen.VolunteerDashboard.route) {
-            VolunteerDashboardScreen(onNavigateToProfile = { navController.navigate(Screen.Profile.route) })
+            VolunteerDashboardScreen(
+                onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
+                onNavigateToEventDetails = { eventId -> navController.navigate(Screen.EventDetails.createRoute(eventId)) }
+            )
+        }
+
+        composable(
+            route = Screen.EventDetails.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
+            EventDetailsScreen(
+                eventId = eventId,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         composable(route = Screen.OrgDashboard.route) {
             OrgDashboardScreen(
                 onNavigateToScan = { navController.navigate(Screen.ScanTicket.route) },
                 onNavigateToCreate = { navController.navigate(Screen.CreateEvent.route) },
-                onNavigateToProfile = { navController.navigate(Screen.Profile.route) }
+                onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
+                onNavigateToEventDetails = { eventId -> navController.navigate(Screen.OrgEventDetails.createRoute(eventId)) }
+            )
+        }
+        
+        composable(
+            route = Screen.OrgEventDetails.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
+            OrgEventDetailsScreen(
+                eventId = eventId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         

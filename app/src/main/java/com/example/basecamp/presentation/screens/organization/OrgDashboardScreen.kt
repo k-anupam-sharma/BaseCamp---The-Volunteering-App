@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -36,6 +37,7 @@ fun OrgDashboardScreen(
     onNavigateToProfile: () -> Unit = {},
     onNavigateToScan: () -> Unit,
     onNavigateToCreate: () -> Unit,
+    onNavigateToEventDetails: (String) -> Unit = {},
     viewModel: OrgViewModel = hiltViewModel()
 ) {
     val dashboardState by viewModel.dashboardState.collectAsState()
@@ -81,7 +83,7 @@ fun OrgDashboardScreen(
                 .padding(16.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp, top = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp, top = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -98,11 +100,19 @@ fun OrgDashboardScreen(
                         contentDescription = "Profile Avatar",
                         modifier = Modifier
                             .size(40.dp)
-                            .clip(CircleShape)
+                            .clip(androidx.compose.foundation.shape.CircleShape)
                             .background(Color.LightGray)
                     )
                 }
             }
+            
+            // Brutalist Refresh Button
+            BrutalistButton(
+                text = "REFRESH DASHBOARD",
+                onClick = { viewModel.fetchDashboardData() },
+                backgroundColor = Color.White,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
+            )
             
             when (dashboardState) {
                 is DashboardState.Loading -> {
@@ -138,7 +148,8 @@ fun OrgDashboardScreen(
                                     event = event, 
                                     rsvpCount = count,
                                     onDeleteClick = { event.id?.let { viewModel.deleteEvent(it) } },
-                                    onAddSpotsClick = { amount -> event.id?.let { viewModel.addVolunteerSpots(it, event.maxVolunteers, amount) } }
+                                    onAddSpotsClick = { amount -> event.id?.let { viewModel.addVolunteerSpots(it, event.maxVolunteers, amount) } },
+                                    onClick = { event.id?.let { onNavigateToEventDetails(it) } }
                                 )
                             }
                         }
@@ -154,14 +165,15 @@ fun OrgEventCard(
     event: Event, 
     rsvpCount: Int, 
     onDeleteClick: () -> Unit, 
-    onAddSpotsClick: (Int) -> Unit
+    onAddSpotsClick: (Int) -> Unit,
+    onClick: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     BrutalistCard(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { expanded = !expanded },
+            .clickable { onClick() },
         backgroundColor = Color.White
     ) {
         Column(

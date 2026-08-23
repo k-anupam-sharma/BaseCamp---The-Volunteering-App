@@ -40,11 +40,47 @@ class OrgViewModel @Inject constructor(
     private val _dashboardState = MutableStateFlow<DashboardState>(DashboardState.Loading)
     val dashboardState: StateFlow<DashboardState> = _dashboardState.asStateFlow()
 
+    private val _eventVolunteersState = MutableStateFlow<List<Pair<com.example.basecamp.domain.model.User, Ticket>>>(emptyList())
+    val eventVolunteersState: StateFlow<List<Pair<com.example.basecamp.domain.model.User, Ticket>>> = _eventVolunteersState.asStateFlow()
+
     val currentUserId: String
         get() = supabaseClient.auth.currentUserOrNull()?.id ?: "unknown"
 
     init {
         fetchDashboardData()
+    }
+
+    fun fetchEventVolunteers(eventId: String) {
+        viewModelScope.launch {
+            try {
+                // 1. Fetch tickets for this event
+                val tickets = supabaseClient.postgrest["tickets"]
+                    .select { filter { eq("event_id", eventId) } }
+                    .decodeList<Ticket>()
+                
+                // 2. Fetch users for those tickets
+                val volunteerIds = tickets.map { it.volunteerId }
+                if (volunteerIds.isEmpty()) {
+                    _eventVolunteersState.value = emptyList()
+                    return@launch
+                }
+                
+                val users = supabaseClient.postgrest["users"]
+                    .select { filter { isIn("id", volunteerIds) } }
+                    .decodeList<com.example.basecamp.domain.model.User>()
+                
+                val userMap = users.associateBy { it.id }
+                
+                val result = tickets.mapNotNull { ticket ->
+                    userMap[ticket.volunteerId]?.let { user ->
+                        Pair(user, ticket)
+                    }
+                }
+                _eventVolunteersState.value = result
+            } catch (e: Exception) {
+                android.util.Log.e("OrgViewModel", "Error fetching volunteers: ${e.message}", e)
+            }
+        }
     }
 
     fun fetchDashboardData() {
@@ -73,7 +109,10 @@ class OrgViewModel @Inject constructor(
         }
     }
 
-    fun createEvent(title: String, description: String, date: String, cause: String, location: String, orgName: String, maxVolunteers: Int) {
+    fun createEvent(
+        title: String, description: String, date: String, cause: String, location: String, orgName: String, maxVolunteers: Int,
+        typeOfWork: String, payment: String, dressCode: String, contactDetails: String
+    ) {
         viewModelScope.launch {
             _createState.value = CreateEventState.Loading
             try {
@@ -86,7 +125,11 @@ class OrgViewModel @Inject constructor(
                     date = date,
                     orgName = orgName,
                     orgId = supabaseClient.auth.currentUserOrNull()?.id ?: "",
-                    maxVolunteers = maxVolunteers
+                    maxVolunteers = maxVolunteers,
+                    typeOfWork = typeOfWork,
+                    payment = payment,
+                    dressCode = dressCode,
+                    contactDetails = contactDetails
                 )
                 
                 supabaseClient.postgrest["events"].insert(newEvent)

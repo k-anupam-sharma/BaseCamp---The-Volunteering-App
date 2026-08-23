@@ -41,6 +41,9 @@ class FeedViewModel @Inject constructor(
     private val _rsvpEventIds = MutableStateFlow<Set<String>>(emptySet())
     val rsvpEventIds: StateFlow<Set<String>> = _rsvpEventIds.asStateFlow()
     
+    private val _myTickets = MutableStateFlow<List<Ticket>>(emptyList())
+    val myTickets: StateFlow<List<Ticket>> = _myTickets.asStateFlow()
+    
     private val _attendedCount = MutableStateFlow<Int>(0)
     val attendedCount: StateFlow<Int> = _attendedCount.asStateFlow()
 
@@ -67,7 +70,9 @@ class FeedViewModel @Inject constructor(
                 val allTickets = supabaseClient.postgrest["tickets"].select().decodeList<Ticket>()
                 
                 // Get my RSVPs
-                val myRsvpIds = allTickets.filter { it.volunteerId == userId }.map { it.eventId }.toSet()
+                val myRsvpTickets = allTickets.filter { it.volunteerId == userId }
+                _myTickets.value = myRsvpTickets
+                val myRsvpIds = myRsvpTickets.map { it.eventId }.toSet()
                 _rsvpEventIds.value = myRsvpIds
                 
                 val myAttendedCount = allTickets.count { it.volunteerId == userId && it.status == "Attended" }
