@@ -105,67 +105,7 @@ You will need a free [Supabase](https://supabase.com/) project to act as the bac
 1. Create a new project in Supabase.
 2. Go to the **SQL Editor** and run the following queries to build your tables and set up security:
 
-```sql
--- 1. Create Users Table
-create table public.users (
-  id uuid primary key references auth.users(id),
-  created_at timestamp with time zone default now(),
-  name text not null,
-  role text not null check (role in ('Volunteer', 'Organization')),
-  email text not null,
-  phone text,
-  website text
-);
-
--- 2. Create Events Table
-create table public.events (
-  id uuid primary key default gen_random_uuid(),
-  created_at timestamp with time zone default now(),
-  org_id uuid not null references public.users(id),
-  title text not null,
-  description text,
-  cause text not null,
-  location text not null,
-  date text not null,
-  org_name text not null,
-  max_volunteers integer default 0,
-  type_of_work text,
-  payment text,
-  dress_code text,
-  contact_details text
-);
-
--- 3. Create Tickets Table
-create table public.tickets (
-  id uuid primary key default gen_random_uuid(),
-  created_at timestamp with time zone default now(),
-  event_id uuid not null references public.events(id) on delete cascade,
-  volunteer_id uuid not null references public.users(id),
-  status text default 'Pending',
-  check_in_time text,
-  check_out_time text
-);
-
--- 4. Create Comments Table
-create table public.comments (
-  id uuid primary key default gen_random_uuid(),
-  created_at timestamp with time zone default now(),
-  event_id uuid not null references public.events(id) on delete cascade,
-  user_id uuid not null references public.users(id),
-  parent_id uuid references public.comments(id) on delete cascade,
-  text text not null
-);
-
--- 5. Create Comment Likes Table
-create table public.comment_likes (
-  id uuid primary key default gen_random_uuid(),
-  created_at timestamp with time zone default now(),
-  comment_id uuid not null references public.comments(id) on delete cascade,
-  user_id uuid not null references public.users(id),
-  unique(comment_id, user_id)
-);
-```
-Alternative SQL Query:
+Main SQL Query:
 ```
 
 -- Drop old tables if they already exist
