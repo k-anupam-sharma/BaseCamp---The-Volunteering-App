@@ -165,8 +165,8 @@ create table public.comment_likes (
   unique(comment_id, user_id)
 );
 ```
-
-```Alternative SQL Query
+Alternative SQL Query:
+```
 
 -- Drop old tables if they already exist
 drop table if exists public.comment_likes cascade;
