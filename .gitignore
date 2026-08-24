@@ -20,3 +20,6 @@ google-services.json
 *.keystore
 secrets.properties
 .env
+
+# Temporary python scripts
+*.py

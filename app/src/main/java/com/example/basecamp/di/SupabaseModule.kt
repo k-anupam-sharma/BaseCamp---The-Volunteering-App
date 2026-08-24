@@ -8,6 +8,8 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.serializer.KotlinXSerializer
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 @Module
@@ -17,7 +19,6 @@ object SupabaseModule {
     @Provides
     @Singleton
     fun provideSupabaseClient(): SupabaseClient {
-        // TODO: Replace with your actual Supabase URL and Anon Key (e.g. from BuildConfig or local.properties)
         val supabaseUrl = com.example.basecamp.BuildConfig.SUPABASE_URL
         val supabaseKey = com.example.basecamp.BuildConfig.SUPABASE_KEY
         
@@ -25,6 +26,15 @@ object SupabaseModule {
             supabaseUrl = supabaseUrl,
             supabaseKey = supabaseKey
         ) {
+            defaultSerializer = KotlinXSerializer(
+                Json {
+                    ignoreUnknownKeys = true
+                    coerceInputValues = true
+                    encodeDefaults = false
+                    explicitNulls = false
+                    isLenient = true
+                }
+            )
             install(Auth) {
                 scheme = "basecamp"
                 host = "login-callback"
@@ -34,8 +44,3 @@ object SupabaseModule {
         }
     }
 }
-
-
-
-
-

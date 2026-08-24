@@ -1,4 +1,0 @@
-import sys
-content = open('app/src/main/java/com/example/basecamp/presentation/components/Components.kt', 'r', encoding='utf-8').read()
-content = content.replace("}\n}\n}\n", "}\n")
-open('app/src/main/java/com/example/basecamp/presentation/components/Components.kt', 'w', encoding='utf-8').write(content)

@@ -105,16 +105,7 @@ You will need a free [Supabase](https://supabase.com/) project to act as the bac
 1. Create a new project in Supabase.
 2. Go to the **SQL Editor** and run the following queries to build your tables and set up security:
 
-Main SQL Query:
-```
-
--- Drop old tables if they already exist
-drop table if exists public.comment_likes cascade;
-drop table if exists public.comments cascade;
-drop table if exists public.tickets cascade;
-drop table if exists public.events cascade;
-drop table if exists public.users cascade;
-
+```sql
 -- 1. Create Users Table
 create table public.users (
   id uuid primary key references auth.users(id),
@@ -137,11 +128,7 @@ create table public.events (
   location text not null,
   date text not null,
   org_name text not null,
-  max_volunteers integer default 0,
-  type_of_work text,
-  payment text,
-  dress_code text,
-  contact_details text
+  max_volunteers integer default 0
 );
 
 -- 3. Create Tickets Table
