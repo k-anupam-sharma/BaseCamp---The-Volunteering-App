@@ -128,7 +128,11 @@ create table public.events (
   location text not null,
   date text not null,
   org_name text not null,
-  max_volunteers integer default 0
+  max_volunteers integer default 0,
+  type_of_work text,
+  payment text,
+  dress_code text,
+  contact_details text
 );
 
 -- 3. Create Tickets Table
