@@ -233,7 +233,7 @@ create table public.comment_likes (
   user_id uuid not null references public.users(id),
   unique(comment_id, user_id)
 );
-'''
+```
 
 ### 2. Configure Local API Keys
 For security, Supabase keys are not checked into GitHub. You must add them to a `local.properties` file.
