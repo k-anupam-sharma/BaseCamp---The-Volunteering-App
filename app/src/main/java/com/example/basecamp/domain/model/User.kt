@@ -1,4 +1,4 @@
-package com.example.basecamp.domain.model
+﻿package com.example.basecamp.domain.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -10,6 +10,8 @@ data class User(
     val name: String,
     val role: String, // 'Volunteer' or 'Organization'
     val email: String,
+    @SerialName("avatar_url") val avatarUrl: String? = null,
     val phone: String? = null,
     val website: String? = null
 )
+

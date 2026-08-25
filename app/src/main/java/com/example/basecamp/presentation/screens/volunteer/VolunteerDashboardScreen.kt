@@ -1,7 +1,9 @@
-package com.example.basecamp.presentation.screens.volunteer
+﻿package com.example.basecamp.presentation.screens.volunteer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,10 +11,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.EventAvailable
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +29,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.example.basecamp.presentation.components.skeuoCard
+import com.example.basecamp.presentation.components.skeuoIcon
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
 import androidx.compose.ui.graphics.Color
@@ -31,8 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.basecamp.domain.model.Event
-import com.example.basecamp.presentation.components.BrutalistButton
-import com.example.basecamp.presentation.components.BrutalistCard
+import com.example.basecamp.presentation.components.GlacierButton
+import com.example.basecamp.presentation.components.GlassPanel
+import com.example.basecamp.presentation.components.AnimatedBackground
+
 
 @Composable
 fun VolunteerDashboardScreen(
@@ -65,42 +75,75 @@ fun VolunteerDashboardScreen(
     
     LaunchedEffect(Unit) {
         while (true) {
-            kotlinx.coroutines.delay(20_000)
+            kotlinx.coroutines.delay(5_000)
             viewModel.fetchEvents(showLoading = false)
         }
     }
 
 
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedBackground()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         bottomBar = {
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .padding(bottom = 32.dp),
+                contentAlignment = Alignment.Center
             ) {
-                BrutalistButton(
-                    text = "ALL EVENTS",
-                    onClick = { selectedTab = "ALL" },
-                    backgroundColor = if (selectedTab == "ALL") Color(0xFFFAFF00) else Color.White,
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                BrutalistButton(
-                    text = "MY RSVPs",
-                    onClick = { selectedTab = "RSVPS" },
-                    backgroundColor = if (selectedTab == "RSVPS") Color(0xFFFAFF00) else Color.White,
-                    modifier = Modifier.weight(1f)
-                )
+                Row(
+                    modifier = Modifier
+                        .skeuoCard(androidx.compose.foundation.shape.RoundedCornerShape(percent = 50))
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val iconTint = Color(0xFFC5C5D4)
+                    val selectedTint = Color.White
+                    
+                    androidx.compose.material3.IconButton(
+                        onClick = { selectedTab = "ALL" },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .then(if (selectedTab == "ALL") Modifier.skeuoIcon(androidx.compose.foundation.shape.CircleShape) else Modifier)
+                    ) {
+                        androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Explore, contentDescription = "All Events", tint = if (selectedTab == "ALL") selectedTint else iconTint)
+                    }
+                    
+                    androidx.compose.material3.IconButton(
+                        onClick = { selectedTab = "RSVPS" },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .then(if (selectedTab == "RSVPS") Modifier.skeuoIcon(androidx.compose.foundation.shape.CircleShape) else Modifier)
+                    ) {
+                        androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.EventAvailable, contentDescription = "My RSVPs", tint = if (selectedTab == "RSVPS") selectedTint else iconTint)
+                    }
+
+                    androidx.compose.material3.IconButton(
+                        onClick = { selectedTab = "NOTIFICATIONS" },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .then(if (selectedTab == "NOTIFICATIONS") Modifier.skeuoIcon(androidx.compose.foundation.shape.CircleShape) else Modifier)
+                    ) {
+                        androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Notifications, contentDescription = "Notifications", tint = if (selectedTab == "NOTIFICATIONS") selectedTint else iconTint)
+                    }
+
+                    androidx.compose.material3.IconButton(
+                        onClick = onNavigateToProfile,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Person, contentDescription = "My Profile", tint = iconTint)
+                    }
+                }
             }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF4F4F0))
+                
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
@@ -110,27 +153,18 @@ fun VolunteerDashboardScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "VOLUNTEER FEED",
+                text = "Volunteer Feed",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
                 letterSpacing = 1.sp
             )
-            IconButton(onClick = onNavigateToProfile) {
-                coil.compose.AsyncImage(
-                    model = "https://api.dicebear.com/9.x/bottts-neutral/png?seed=${viewModel.currentUserId}",
-                    contentDescription = "Profile Avatar",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(androidx.compose.foundation.shape.CircleShape)
-                        .background(Color.LightGray)
-                )
-            }
+
         }
         
         // Attended Count Header
-        BrutalistCard(
-            backgroundColor = Color(0xFF00E5FF), // Cyan
+        GlassPanel(
+            backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant, // Cyan
             modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
         ) {
             Row(
@@ -141,7 +175,7 @@ fun VolunteerDashboardScreen(
                     text = "EVENTS ATTENDED: $attendedCount",
                     fontWeight = FontWeight.Black,
                     fontSize = 18.sp,
-                    color = Color.Black
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -149,7 +183,7 @@ fun VolunteerDashboardScreen(
         when (feedState) {
             is FeedState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Color.Black)
+                    CircularProgressIndicator(color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
                 }
             }
             is FeedState.Success -> {
@@ -161,9 +195,9 @@ fun VolunteerDashboardScreen(
                 if (eventsToShow.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = if (selectedTab == "ALL") "NO AVAILABLE EVENTS" else "YOU HAVEN'T RSVP'D YET", 
+                            text = if (selectedTab == "ALL") "No available events" else "You haven't RSVP'd yet", 
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
                         )
                     }
                 } else {
@@ -182,6 +216,9 @@ fun VolunteerDashboardScreen(
                                     if (isRsvped) {
                                         event.id?.let { onNavigateToEventDetails(it) }
                                     }
+                                },
+                                onCardClick = {
+                                    event.id?.let { onNavigateToEventDetails(it) }
                                 }
                             )
                         }
@@ -192,7 +229,7 @@ fun VolunteerDashboardScreen(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         text = (feedState as FeedState.Error).message,
-                        color = Color(0xFFFF007F), // Hot Pink
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.tertiary, // Hot Pink
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -201,68 +238,85 @@ fun VolunteerDashboardScreen(
     }
 }
 }
+}
+
+
+
 
 @Composable
-fun EventCard(event: Event, isRsvped: Boolean, onRsvpClick: () -> Unit, onShowQrClick: () -> Unit) {
-    BrutalistCard(
-        modifier = Modifier.fillMaxWidth(),
-        backgroundColor = Color.White
+fun EventCard(event: Event, isRsvped: Boolean, onRsvpClick: () -> Unit, onShowQrClick: () -> Unit, onCardClick: () -> Unit) {
+    androidx.compose.material3.Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCardClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.White),
+        elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = event.title.uppercase(),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "ORG: ${event.orgName}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.DarkGray
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "CAUSE: ${event.cause}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFF007F) // Hot Pink for cause tags
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "📍 ${event.location} | 🗓 ${event.date}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            if (isRsvped) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.LightGray)
-                        .clickable { onShowQrClick() }
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "RSVP'D - TAP FOR DETAILS & TICKET",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.DarkGray
-                    )
+        Column {
+            // Image Placeholder Header
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+                    .background(
+                        androidx.compose.ui.graphics.Brush.horizontalGradient(
+                            listOf(androidx.compose.ui.graphics.Color(0xFFE0E0E0), androidx.compose.ui.graphics.Color(0xFFEEEEEE))
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Filled.LocationOn, contentDescription = null, tint = androidx.compose.ui.graphics.Color(0xFFBDBDBD), modifier = Modifier.size(48.dp))
+            }
+            // Content
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(event.date.uppercase(), color = androidx.compose.ui.graphics.Color(0xFFD32F2F), fontWeight = FontWeight.ExtraBold, fontSize = 12.sp) // Meetup red date
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(event.title, fontSize = 18.sp, fontWeight = FontWeight.Black, color = androidx.compose.ui.graphics.Color.Black)
+                Text("Hosted by " + event.orgName, fontSize = 14.sp, color = androidx.compose.ui.graphics.Color.DarkGray)
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.LocationOn, contentDescription = "Location", tint = androidx.compose.ui.graphics.Color.Gray, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(event.location, fontSize = 14.sp, color = androidx.compose.ui.graphics.Color.Gray)
                 }
-            } else {
-                BrutalistButton(
-                    text = "RSVP",
-                    onClick = onRsvpClick,
-                    backgroundColor = Color(0xFFFAFF00), // Electric Yellow
-                    modifier = Modifier.align(Alignment.End)
-                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                if (isRsvped) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "You're going!",
+                            color = androidx.compose.ui.graphics.Color(0xFF388E3C), // Green text
+                            fontWeight = FontWeight.Bold
+                        )
+                        androidx.compose.material3.Button(
+                            onClick = onShowQrClick,
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = androidx.compose.ui.graphics.Color(0xFFF3F4F6), 
+                                contentColor = androidx.compose.ui.graphics.Color.Black
+                            )
+                        ) {
+                            Text("Show QR")
+                        }
+                    }
+                } else {
+                    androidx.compose.material3.Button(
+                        onClick = onRsvpClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = androidx.compose.ui.graphics.Color(0xFFE53935), // Red button
+                            contentColor = androidx.compose.ui.graphics.Color.White
+                        )
+                    ) {
+                        Text("Attend", fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
     }

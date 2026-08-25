@@ -1,4 +1,4 @@
-package com.example.basecamp.presentation.screens.organization
+﻿package com.example.basecamp.presentation.screens.organization
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -83,9 +83,9 @@ class OrgViewModel @Inject constructor(
         }
     }
 
-    fun fetchDashboardData() {
+    fun fetchDashboardData(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _dashboardState.value = DashboardState.Loading
+            if (showLoading) _dashboardState.value = DashboardState.Loading
             try {
                 val userId = currentUserId
                 // 1. Fetch events created by this org
@@ -141,6 +141,46 @@ class OrgViewModel @Inject constructor(
         }
     }
     
+        fun getEvent(eventId: String): Event? {
+        val state = _dashboardState.value
+        if (state is DashboardState.Success) {
+            return state.eventsWithCounts.find { it.first.id == eventId }?.first
+        }
+        return null
+    }
+
+    fun updateEvent(
+        eventId: String,
+        title: String,
+        description: String,
+        cause: String,
+        location: String,
+        date: String
+    ) {
+        viewModelScope.launch {
+            _createState.value = CreateEventState.Loading
+            try {
+                // Update the event
+                val updateData = mapOf(
+                    "title" to title,
+                    "description" to description,
+                    "cause" to cause,
+                    "location" to location,
+                    "date" to date
+                )
+                supabaseClient.postgrest["events"]
+                    .update(updateData) {
+                        filter { eq("id", eventId) }
+                    }
+                
+                _createState.value = CreateEventState.Success
+                fetchDashboardData() // Refresh list
+            } catch (e: Exception) {
+                _createState.value = CreateEventState.Error(e.message ?: "Failed to update event")
+            }
+        }
+    }
+
     fun deleteEvent(eventId: String) {
         viewModelScope.launch {
             try {
@@ -178,6 +218,9 @@ class OrgViewModel @Inject constructor(
         return msg.substringBefore("URL:").substringBefore("HTTP request to").trim()
     }
 }
+
+
+
 
 
 

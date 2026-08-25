@@ -49,7 +49,7 @@ fun CompleteProfileScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "ALMOST THERE",
+            text = "Almost There",
             fontSize = 32.sp,
             fontWeight = FontWeight.ExtraBold,
             color = Color.Black,
@@ -57,7 +57,7 @@ fun CompleteProfileScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "COMPLETE YOUR PROFILE",
+            text = "Complete your profile",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
@@ -82,13 +82,13 @@ fun CompleteProfileScreen(
             val orgColor = if (role == "Organization") Color(0xFFFAFF00) else Color.White
 
             BrutalistButton(
-                text = "VOLUNTEER",
+                text = "Volunteer",
                 onClick = { role = "Volunteer" },
                 backgroundColor = volColor,
                 modifier = Modifier.weight(1f)
             )
             BrutalistButton(
-                text = "ORGANIZATION",
+                text = "Organization",
                 onClick = { role = "Organization" },
                 backgroundColor = orgColor,
                 modifier = Modifier.weight(1f)
@@ -101,19 +101,19 @@ fun CompleteProfileScreen(
             BrutalistTextField(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = "FULL NAME"
+                placeholder = "Full name"
             )
         } else {
             BrutalistTextField(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = "ORGANIZATION NAME"
+                placeholder = "Organization name"
             )
             Spacer(modifier = Modifier.height(16.dp))
             BrutalistTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                placeholder = "PHONE NUMBER"
+                placeholder = "Phone number"
             )
             Spacer(modifier = Modifier.height(16.dp))
             BrutalistTextField(
@@ -129,7 +129,7 @@ fun CompleteProfileScreen(
             CircularProgressIndicator(color = Color.Black)
         } else {
             BrutalistButton(
-                text = "FINISH ACCOUNT CREATION",
+                text = "Finish Account Creation",
                 onClick = {
                     viewModel.completeGoogleSignup(
                         userId = userId,

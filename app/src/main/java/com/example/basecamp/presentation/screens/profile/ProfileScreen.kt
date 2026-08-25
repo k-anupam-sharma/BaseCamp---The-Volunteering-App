@@ -1,4 +1,4 @@
-package com.example.basecamp.presentation.screens.profile
+﻿package com.example.basecamp.presentation.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,16 +13,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.example.basecamp.presentation.components.AnimatedBackground
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.basecamp.presentation.components.BrutalistButton
-import com.example.basecamp.presentation.components.BrutalistCard
-import com.example.basecamp.presentation.components.BrutalistTextField
+import com.example.basecamp.presentation.components.GlacierButton
+import com.example.basecamp.presentation.components.GlassPanel
+import com.example.basecamp.presentation.components.GlacierTextField
 
 @Composable
 fun ProfileScreen(
@@ -61,10 +70,12 @@ fun ProfileScreen(
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
+    AnimatedBackground()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F4F0))
+            
             .padding(24.dp)
             .verticalScroll(rememberScrollState())
     ) {
@@ -76,15 +87,15 @@ fun ProfileScreen(
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.Black
+                    tint = Color.White
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "MY PROFILE",
+                text = "My Profile",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black,
+                color = Color.White,
                 letterSpacing = 2.sp
             )
         }
@@ -104,15 +115,15 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         if (state is ProfileState.Loading) {
-            CircularProgressIndicator(color = Color.Black, modifier = Modifier.align(Alignment.CenterHorizontally))
+            CircularProgressIndicator(color = Color.White, modifier = Modifier.align(Alignment.CenterHorizontally))
         } else if (state is ProfileState.Success) {
             val user = (state as ProfileState.Success).user
             
             Text(
-                text = "ROLE: ${user.role.uppercase()}",
+                text = "ROLE: ${user.role}",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Gray
+                color = Color.LightGray
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -121,40 +132,40 @@ fun ProfileScreen(
                 text = "EMAIL (LOCKED)",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Gray
+                color = Color.LightGray
             )
-            BrutalistTextField(
+            GlacierTextField(
                 value = user.email,
                 onValueChange = { },
-                placeholder = "EMAIL"
+                placeholder = "Email"
             )
 
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "NAME",
+                text = "Name",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Gray
+                color = Color.LightGray
             )
-            BrutalistTextField(
+            GlacierTextField(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = "NAME"
+                placeholder = "Name"
             )
 
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "PHONE NUMBER",
+                text = "Phone Number",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Gray
+                color = Color.LightGray
             )
-            BrutalistTextField(
+            GlacierTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                placeholder = "PHONE NUMBER"
+                placeholder = "Phone number"
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -163,21 +174,21 @@ fun ProfileScreen(
                 text = "WEBSITE (OPTIONAL)",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Gray
+                color = Color.LightGray
             )
-            BrutalistTextField(
+            GlacierTextField(
                 value = website,
                 onValueChange = { website = it },
-                placeholder = "WEBSITE"
+                placeholder = "Website"
             )
 
             if (user.role.equals("Volunteer", ignoreCase = true)) {
                 Spacer(modifier = Modifier.height(32.dp))
                 Text(
-                    text = "MY BADGES",
+                    text = "My Badges",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.Black
+                    color = Color.White
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
@@ -187,10 +198,10 @@ fun ProfileScreen(
                     GAMIFICATION_BADGES.forEach { badge ->
                         val isUnlocked = rsvpCount >= badge.requiredRsvps
                         val bgColor = if (isUnlocked) Color(badge.color) else Color.LightGray
-                        val textColor = if (isUnlocked) Color.Black else Color.DarkGray
-                        val lockText = if (isUnlocked) "★" else "🔒"
+                        val textColor = if (isUnlocked) Color.White else Color.DarkGray
+                        val lockText = if (isUnlocked) "â˜…" else "ðŸ”’"
 
-                            BrutalistCard(
+                            GlassPanel(
                             modifier = Modifier.weight(1f).height(140.dp),
                             backgroundColor = bgColor
                         ) {
@@ -229,8 +240,8 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            BrutalistButton(
-                text = "SAVE CHANGES",
+            GlacierButton(
+                text = "Save Changes",
                 onClick = { viewModel.updateProfile(name, phone, website) },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -247,8 +258,8 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.weight(1f, fill = false))
         Spacer(modifier = Modifier.height(32.dp))
         
-        BrutalistButton(
-            text = "LOGOUT",
+        GlacierButton(
+            text = "Log Out",
             onClick = {
                 viewModel.logout()
             },
@@ -258,3 +269,6 @@ fun ProfileScreen(
         )
     }
 }
+}
+
+

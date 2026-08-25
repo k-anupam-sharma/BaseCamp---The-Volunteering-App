@@ -1,19 +1,23 @@
-package com.example.basecamp // Use your actual package name
+﻿package com.example.basecamp // Use your actual package name
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.basecamp.presentation.navigation.BaseCampNavGraph
+import com.example.basecamp.presentation.theme.BaseCampTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            BaseCampNavGraph()
+            BaseCampTheme {
+                BaseCampNavGraph()
+            }
         }
     }
 }
+
 
 

@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.basecamp.presentation.components.BrutalistButton
-import com.example.basecamp.presentation.components.BrutalistCard
+import com.example.basecamp.presentation.components.GlacierButton
+import com.example.basecamp.presentation.components.GlassPanel
 import java.util.concurrent.Executors
 
 @Composable
@@ -121,9 +121,9 @@ fun ScanTicketScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Header
-            BrutalistCard(backgroundColor = Color.White) {
+            GlassPanel(backgroundColor = Color.White) {
                 Text(
-                    text = "SCAN QR TICKET",
+                    text = "Scan QR Ticket",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.Black,
@@ -134,7 +134,7 @@ fun ScanTicketScreen(
             // Central State UI
             when (scanState) {
                 is ScanState.Loading -> {
-                    BrutalistCard(backgroundColor = Color(0xFFFAFF00)) { // Electric Yellow
+                    GlassPanel(backgroundColor = Color(0xFFFAFF00)) { // Electric Yellow
                         Column(
                             modifier = Modifier.padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -148,7 +148,7 @@ fun ScanTicketScreen(
                 is ScanState.Success -> {
                     val message = (scanState as ScanState.Success).message
                     // Massive Bright Electric Yellow brutalist success banner
-                    BrutalistCard(
+                    GlassPanel(
                         backgroundColor = Color(0xFFFAFF00),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -170,8 +170,8 @@ fun ScanTicketScreen(
                                 color = Color.DarkGray
                             )
                             Spacer(modifier = Modifier.height(32.dp))
-                            BrutalistButton(
-                                text = "SCAN NEXT",
+                            GlacierButton(
+                                text = "Scan Next",
                                 onClick = { viewModel.resumeScanning() },
                                 backgroundColor = Color.White,
                                 modifier = Modifier.fillMaxWidth()
@@ -180,7 +180,7 @@ fun ScanTicketScreen(
                     }
                 }
                 is ScanState.Error -> {
-                    BrutalistCard(backgroundColor = Color(0xFFFF007F)) { // Hot Pink Error
+                    GlassPanel(backgroundColor = Color(0xFFFF007F)) { // Hot Pink Error
                         Column(
                             modifier = Modifier.padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -192,8 +192,8 @@ fun ScanTicketScreen(
                                 fontSize = 24.sp
                             )
                             Spacer(modifier = Modifier.height(24.dp))
-                            BrutalistButton(
-                                text = "RETRY",
+                            GlacierButton(
+                                text = "Retry",
                                 onClick = { viewModel.resumeScanning() },
                                 backgroundColor = Color.White,
                                 modifier = Modifier.fillMaxWidth()
@@ -212,8 +212,8 @@ fun ScanTicketScreen(
             }
 
             // Footer
-            BrutalistButton(
-                text = "BACK TO DASHBOARD",
+            GlacierButton(
+                text = "Back to Dashboard",
                 onClick = onNavigateBack,
                 backgroundColor = Color.White,
                 modifier = Modifier.fillMaxWidth()

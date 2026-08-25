@@ -1,15 +1,20 @@
-package com.example.basecamp.presentation.screens.organization
+﻿package com.example.basecamp.presentation.screens.organization
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Alignment
@@ -27,130 +31,164 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.basecamp.presentation.theme.brutalistStyle
 import com.example.basecamp.domain.model.Event
-import com.example.basecamp.presentation.components.BrutalistCard
-import com.example.basecamp.presentation.components.BrutalistButton
+import com.example.basecamp.presentation.components.GlassPanel
+import com.example.basecamp.presentation.components.GlacierButton
+import com.example.basecamp.presentation.components.AnimatedBackground
+import com.example.basecamp.presentation.components.skeuoCard
+import com.example.basecamp.presentation.components.skeuoIcon
+import com.example.basecamp.presentation.components.skeuoButtonPrimary
 
 @Composable
 fun OrgDashboardScreen(
     onNavigateToProfile: () -> Unit = {},
     onNavigateToScan: () -> Unit,
-    onNavigateToCreate: () -> Unit,
+    onNavigateToCreate: (String?) -> Unit,
     onNavigateToEventDetails: (String) -> Unit = {},
     viewModel: OrgViewModel = hiltViewModel()
 ) {
     val dashboardState by viewModel.dashboardState.collectAsState()
+    var selectedTab by remember { mutableStateOf("DASHBOARD") }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = Color(0xFFF4F4F0), // Off-white background
-        floatingActionButtonPosition = FabPosition.End,
-        floatingActionButton = {
-            Column(horizontalAlignment = Alignment.End) {
+        LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(5_000)
+            viewModel.fetchDashboardData(showLoading = false)
+        }
+    }
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedBackground()
+
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            bottomBar = {
                 Box(
                     modifier = Modifier
-                        .brutalistStyle(cornerRadius = 0.dp)
-                        .background(Color.White)
-                        .clickable(onClick = onNavigateToCreate)
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .fillMaxWidth()
+                        .padding(bottom = 32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("CREATE EVENT", color = Color.Black, fontWeight = FontWeight.ExtraBold)
+                    Row(
+                        modifier = Modifier
+                            .skeuoCard(RoundedCornerShape(percent = 50))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val iconTint = Color(0xFFC5C5D4)
+                        val selectedTint = Color.White
+                        
+                        // 1. Dashboard
+                        IconButton(
+                            onClick = { selectedTab = "DASHBOARD" },
+                            modifier = Modifier
+                                .size(48.dp)
+                                .then(if (selectedTab == "DASHBOARD") Modifier.skeuoIcon(CircleShape) else Modifier)
+                        ) {
+                            Icon(Icons.Filled.Dashboard, contentDescription = "Dashboard", tint = if (selectedTab == "DASHBOARD") selectedTint else iconTint)
+                        }
+                        
+                        // 2. Scan Tickets
+                        IconButton(
+                            onClick = onNavigateToScan,
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(Icons.Filled.QrCodeScanner, contentDescription = "Scan Tickets", tint = iconTint)
+                        }
+
+                        // 3. Create Event (Large +)
+                        IconButton(
+                            onClick = { onNavigateToCreate(null) },
+                            modifier = Modifier
+                                .size(64.dp)
+                                .skeuoButtonPrimary(CircleShape)
+                        ) {
+                            Icon(Icons.Filled.Add, contentDescription = "Create Event", tint = Color.White, modifier = Modifier.size(32.dp))
+                        }
+
+                        // 4. Notifications
+                        IconButton(
+                            onClick = { selectedTab = "NOTIFICATIONS" },
+                            modifier = Modifier
+                                .size(48.dp)
+                                .then(if (selectedTab == "NOTIFICATIONS") Modifier.skeuoIcon(CircleShape) else Modifier)
+                        ) {
+                            Icon(Icons.Filled.Notifications, contentDescription = "Notifications", tint = if (selectedTab == "NOTIFICATIONS") selectedTint else iconTint)
+                        }
+
+                        // 5. My Profile
+                        IconButton(
+                            onClick = onNavigateToProfile,
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(Icons.Filled.Person, contentDescription = "My Profile", tint = iconTint)
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Box(
-                    modifier = Modifier
-                        .brutalistStyle(cornerRadius = 0.dp)
-                        .background(Color(0xFFFAFF00)) // Electric Yellow
-                        .clickable(onClick = onNavigateToScan)
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
-                    contentAlignment = Alignment.Center
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp, top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "SCAN TICKETS",
-                        color = Color.Black,
-                        fontWeight = FontWeight.ExtraBold
+                        text = "Org Dashboard",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        letterSpacing = 1.sp
                     )
                 }
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp, top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "ORG DASHBOARD",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.Black,
-                    letterSpacing = 1.sp
-                )
-                IconButton(onClick = onNavigateToProfile) {
-                    coil.compose.AsyncImage(
-                        model = "https://api.dicebear.com/9.x/bottts-neutral/png?seed=${viewModel.currentUserId}",
-                        contentDescription = "Profile Avatar",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(androidx.compose.foundation.shape.CircleShape)
-                            .background(Color.LightGray)
-                    )
-                }
-            }
-            
-            // Brutalist Refresh Button
-            BrutalistButton(
-                text = "REFRESH DASHBOARD",
-                onClick = { viewModel.fetchDashboardData() },
-                backgroundColor = Color.White,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
-            )
-            
-            when (dashboardState) {
-                is DashboardState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color.Black)
-                    }
-                }
-                is DashboardState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = (dashboardState as DashboardState.Error).message,
-                            color = Color(0xFFFF007F), // Hot Pink
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-                is DashboardState.Success -> {
-                    val eventsWithCounts = (dashboardState as DashboardState.Success).eventsWithCounts
-                    if (eventsWithCounts.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "NO ACTIVE EVENTS", fontWeight = FontWeight.Bold, color = Color.Black)
+                
+                
+                
+                when (dashboardState) {
+                    is DashboardState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
                         }
-                    } else {
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(eventsWithCounts) { (event, count) ->
-                                OrgEventCard(
-                                    event = event, 
-                                    rsvpCount = count,
-                                    onDeleteClick = { event.id?.let { viewModel.deleteEvent(it) } },
-                                    onAddSpotsClick = { amount -> event.id?.let { viewModel.addVolunteerSpots(it, event.maxVolunteers, amount) } },
-                                    onClick = { event.id?.let { onNavigateToEventDetails(it) } }
-                                )
+                    }
+                    is DashboardState.Error -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = (dashboardState as DashboardState.Error).message,
+                                color = Color(0xFF7DD3FC),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    is DashboardState.Success -> {
+                        val eventsWithCounts = (dashboardState as DashboardState.Success).eventsWithCounts
+                        if (eventsWithCounts.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "No active events", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                            }
+                        } else {
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(eventsWithCounts) { (event, count) ->
+                                    OrgEventCard(
+                                          event = event,
+                                          count = count,
+                                          viewModel = viewModel,
+                                          onNavigateToEventDetails = onNavigateToEventDetails,
+                                          onEditEvent = { onNavigateToCreate(it) }
+                                      )
+                                }
                             }
                         }
                     }
@@ -162,102 +200,89 @@ fun OrgDashboardScreen(
 
 @Composable
 fun OrgEventCard(
-    event: Event, 
-    rsvpCount: Int, 
-    onDeleteClick: () -> Unit, 
-    onAddSpotsClick: (Int) -> Unit,
-    onClick: () -> Unit = {}
+    event: Event,
+    onEditEvent: (String) -> Unit,
+    count: Int,
+    viewModel: OrgViewModel,
+    onNavigateToEventDetails: (String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    BrutalistCard(
+    com.example.basecamp.presentation.components.GlassPanel(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        backgroundColor = Color.White
+            .clickable { event.id?.let { onNavigateToEventDetails(it) } },
+        backgroundColor = androidx.compose.ui.graphics.Color(0x662B2B2B)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(16.dp)
         ) {
             Text(
-                text = event.title.uppercase(),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
+                text = event.date.uppercase(),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = androidx.compose.ui.graphics.Color(0xFFD4D4D4)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "CAUSE: ${event.cause}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFF007F) // Hot Pink for cause tags
+                text = event.title,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = androidx.compose.ui.graphics.Color.White
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "📍 ${event.location} | 🗓 ${event.date}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            val maxStr = if (event.maxVolunteers > 0) event.maxVolunteers.toString() else "∞"
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFFAFF00)) // Electric Yellow
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.LocationOn, contentDescription = "Location", tint = androidx.compose.ui.graphics.Color(0xFFB3B3B3), modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "$rsvpCount / $maxStr RSVPs",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color.Black
+                    text = event.location,
+                    fontSize = 12.sp,
+                    color = androidx.compose.ui.graphics.Color(0xFFB3B3B3)
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
             
-            if (expanded) {
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    BrutalistButton(
-                        text = "DELETE",
-                        onClick = onDeleteClick,
-                        backgroundColor = Color(0xFFFF007F), // Hot Pink
-                        textColor = Color.White,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    BrutalistButton(
-                        text = "+1 SPOT",
-                        onClick = { onAddSpotsClick(1) },
-                        backgroundColor = Color(0xFFFAFF00), // Electric Yellow
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    BrutalistButton(
-                        text = "+5 SPOTS",
-                        onClick = { onAddSpotsClick(5) },
-                        backgroundColor = Color.White,
-                        modifier = Modifier.weight(1f)
+            val maxStr = if (event.maxVolunteers > 0) event.maxVolunteers.toString() else "Unlimited"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.Group, contentDescription = "RSVPs", tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${count} / ${maxStr} RSVPs",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = androidx.compose.ui.graphics.Color.White
                     )
                 }
-            } else {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "▼ TAP TO MANAGE EVENT",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.IconButton(
+                        onClick = { event.id?.let { viewModel.addVolunteerSpots(it, event.maxVolunteers, 10) } },
+                        modifier = Modifier.size(36.dp).background(androidx.compose.ui.graphics.Color(0x40FFFFFF), CircleShape)
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = "Add Spots", tint = androidx.compose.ui.graphics.Color.White)
+                    }
+                    androidx.compose.material3.IconButton(
+                        onClick = { event.id?.let { onEditEvent(it) } },
+                        modifier = Modifier.size(36.dp).background(androidx.compose.ui.graphics.Color(0x40FFFFFF), CircleShape)
+                    ) {
+                        Icon(Icons.Filled.Edit, contentDescription = "Edit Event", tint = androidx.compose.ui.graphics.Color.White)
+                    }
+                    androidx.compose.material3.IconButton(
+                        onClick = { event.id?.let { viewModel.deleteEvent(it) } },
+                        modifier = Modifier.size(36.dp).background(Color(0xFFE53935).copy(alpha = 0.3f), CircleShape)
+                    ) {
+                        Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = Color(0xFFFFCDD2))
+                    }
+                }
             }
         }
     }
 }
+
+
+
 
 

@@ -1,4 +1,9 @@
-package com.example.basecamp.presentation.auth
+﻿package com.example.basecamp.presentation.auth
+
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,8 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.basecamp.presentation.components.BrutalistButton
-import com.example.basecamp.presentation.components.BrutalistTextField
+import com.example.basecamp.presentation.components.GlacierButton
+import com.example.basecamp.presentation.components.AnimatedBackground
+import com.example.basecamp.presentation.components.GlassPanel
+import com.example.basecamp.presentation.components.GlacierTextField
 
 @Composable
 fun LoginScreen(
@@ -39,67 +46,75 @@ fun LoginScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedBackground()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(Color(0xFFF4F4F0)) // Off-White/Beige from Design.md
+            
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.Asset("employee_content.lottie"))
+        LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier.size(250.dp)
+        )
         Text(
-            text = "BASECAMP",
+            text = "BaseCamp",
             fontSize = 48.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = Color.Black,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
             letterSpacing = 2.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "LOG IN TO CONTINUE",
+            text = "Log in to continue",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        BrutalistTextField(
+        GlacierTextField(
             value = email,
             onValueChange = { email = it },
-            placeholder = "EMAIL ADDRESS"
+            placeholder = "Email address"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        BrutalistTextField(
+        GlacierTextField(
             value = password,
             onValueChange = { password = it },
-            placeholder = "PASSWORD",
+            placeholder = "Password",
             isPassword = true
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         if (authState is AuthState.Loading) {
-            CircularProgressIndicator(color = Color.Black)
+            CircularProgressIndicator(color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
         } else {
             
 
-            BrutalistButton(
-                text = "LOG IN",
+            GlacierButton(
+                text = "Log In",
                 onClick = { viewModel.login(email, password) },
                 modifier = Modifier.fillMaxWidth()
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            BrutalistButton(
-                text = "CONTINUE WITH GOOGLE",
+            GlacierButton(
+                text = "Continue with Google",
                 onClick = { viewModel.loginWithGoogle() },
-                backgroundColor = Color.White,
-                textColor = Color.Black,
+                backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant,
+                textColor = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -108,20 +123,23 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = (authState as AuthState.Error).message,
-                color = Color(0xFFFF007F), // Hot Pink for errors
+                color = androidx.compose.material3.MaterialTheme.colorScheme.error, // Hot Pink for errors
                 fontWeight = FontWeight.Bold
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        BrutalistButton(
-            text = "CREATE ACCOUNT",
+        GlacierButton(
+            text = "Create Account",
             onClick = onNavigateToSignup,
-            backgroundColor = Color.White,
+            backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier.fillMaxWidth()
         )
     }
+    }
 }
+
+
 
 

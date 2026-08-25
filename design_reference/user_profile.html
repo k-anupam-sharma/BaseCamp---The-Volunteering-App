@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kai Silva - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#0f1524",
+                      "on-primary-fixed-variant": "#004d73",
+                      "inverse-on-surface": "#0a0e1a",
+                      "surface-container-highest": "#202c42",
+                      "surface-bright": "#1a2438",
+                      "surface-container-high": "#1a2438",
+                      "primary-fixed": "#c8eaff",
+                      "error": "#ff6b6b",
+                      "surface-container-low": "#111828",
+                      "on-primary-fixed": "#001f2e",
+                      "surface-container": "#141c2e",
+                      "surface-variant": "#1a2438",
+                      "on-secondary-fixed-variant": "#2a4a5e",
+                      "primary-fixed-dim": "#7dd3fc",
+                      "tertiary-fixed": "#e8d0ff",
+                      "on-primary-container": "#c8eaff",
+                      "primary-container": "#0e4d6e",
+                      "primary": "#7dd3fc",
+                      "surface-dim": "#0f1524",
+                      "secondary-fixed-dim": "#88b4cc",
+                      "secondary-container": "#1a3a4e",
+                      "surface-container-lowest": "#0a0e1a",
+                      "on-secondary-fixed": "#0d1f2b",
+                      "on-error-container": "#ffb3b3",
+                      "on-secondary": "#001f2e",
+                      "on-tertiary-fixed-variant": "#4d2a73",
+                      "surface-tint": "#7dd3fc",
+                      "tertiary-fixed-dim": "#c8a0f0",
+                      "on-tertiary-fixed": "#1a002e",
+                      "on-secondary-container": "#c0d8e8",
+                      "outline-variant": "#2a3a48",
+                      "inverse-primary": "#0a4c6e",
+                      "tertiary-container": "#3d2060",
+                      "on-tertiary-container": "#e8d0ff",
+                      "on-primary": "#001f2e",
+                      "outline": "#4a6070",
+                      "inverse-surface": "#e0e8f0",
+                      "on-background": "#e0e8f0",
+                      "error-container": "#3d1414",
+                      "secondary": "#88b4cc",
+                      "background": "#0a0e1a",
+                      "on-surface-variant": "#a0b4c4",
+                      "secondary-fixed": "#c0d8e8",
+                      "on-surface": "#e0e8f0",
+                      "on-error": "#1a0000",
+                      "on-tertiary": "#1a002e",
+                      "tertiary": "#c8a0f0"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.5rem",
+                      "lg": "1rem",
+                      "xl": "1.5rem",
+                      "full": "9999px"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Inter"
+                      ],
+                      "display": [
+                              "Inter"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {}
+      },
+          },
+        }
+      </script>
+<style>
+        .glass-panel {
+            background: rgba(15, 21, 36, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(125, 211, 252, 0.1);
+        }
+        .glass-panel-elevated {
+            background: rgba(15, 21, 36, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(125, 211, 252, 0.15);
+        }
+        .glow-effect {
+            box-shadow: 0 0 30px rgba(125, 211, 252, 0.05);
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-transparent text-on-surface font-body min-h-screen selection:bg-primary/30 selection:text-primary relative">
+<!-- Shader Background -->
+<canvas class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none" id="shader-bg"></canvas>
+<!-- Main Container -->
+<div class="relative z-10 w-full min-h-screen flex flex-col">
+<!-- Top Navigation Container -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface/40 backdrop-blur-xl border-b border-primary/10 shadow-[0_0_30px_rgba(125,211,252,0.05)]">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-variant/50 backdrop-blur-sm border border-primary/20 overflow-hidden flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="A small circular avatar placeholder for a user profile in a high-end, dark mode UI with deep navy blacks and glowing ice-blue accents. The portrait is softly lit with a cool, cinematic light source." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv-eitn6G_bS3ZXJ4qzE4Cx0_CkL_BYc9Z1twUPL0tt9j1eoWbz2VqjY6Ukz7AER71fH5Fvkoxvbu_wg6eYMSweiyGSf7K9nD27fISZcFrqEgHL7PDXL6vnfxnViujKmjxn41J3kECpplaHOnKZG-SpbB7exMWL4BD1XlSG_tEtesMwNkTAafStxnUS-CMhmGzhpWhTk6YqWbzVT04vXoh5Ainl2O-QQ_ZVf4P_QZv1bi6-6vxTm11jQ"/>
+</div>
+<h1 class="font-headline font-semibold tracking-tight text-xl font-bold tracking-tighter text-primary">Glacier</h1>
+</div>
+<!-- Desktop Nav (Hidden on mobile) -->
+<nav class="hidden md:flex items-center gap-8 font-label text-sm font-medium">
+<a class="text-on-surface-variant hover:bg-primary/10 transition-colors px-3 py-2 rounded-lg active:scale-95 duration-200" href="#">Explore</a>
+<a class="text-on-surface-variant hover:bg-primary/10 transition-colors px-3 py-2 rounded-lg active:scale-95 duration-200" href="#">Leaderboard</a>
+<a class="text-on-surface-variant hover:bg-primary/10 transition-colors px-3 py-2 rounded-lg active:scale-95 duration-200" href="#">Rewards</a>
+<a class="text-primary hover:bg-primary/10 transition-colors px-3 py-2 rounded-lg active:scale-95 duration-200" href="#">Profile</a>
+</nav>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-primary/10 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="pt-24 pb-32 px-4 md:px-8 max-w-7xl mx-auto flex flex-col gap-6">
+<!-- Profile Header Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Avatar & Bio Card -->
+<div class="glass-panel rounded-xl p-8 col-span-1 md:col-span-8 flex flex-col md:flex-row items-center md:items-start gap-8 glow-effect">
+<div class="relative group">
+<div class="w-32 h-32 rounded-full overflow-hidden border-2 border-primary/20 p-1 transition-all duration-300 group-hover:border-primary/50 group-hover:shadow-[0_0_30px_rgba(125,211,252,0.2)] bg-surface/30 backdrop-blur-sm">
+<img class="w-full h-full object-cover rounded-full" data-alt="A highly detailed close-up portrait of Kai Silva, a modern tech professional. The lighting is dark and moody, featuring deep navy and black tones with striking ice-blue highlights that reflect a 'frozen light' glassmorphic UI style. The portrait is crisp, premium, and sophisticated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFUW3hdMAKv7rUXCqWlQPduc5-LLO1fWqGSQWBNdMb2k0uMSXJVg6UlOki3ZIuD8PZK6ibPEeFcoT_QPuBvslCcm7vcnTOl6nrLw_EqnxYJmC4yD2LmWN7MD3GFa7WS64XshBcf0pd-P__71bn4EHpP0JkxBntmrCay-G18vL5ksVFQhSC6uRmAC4fnf2DOeEW1lBo_KmsAtfNKMvRYzkZ5QTqiCBeE23vA1IiEQhsNdKuZAv5zGqX1g"/>
+</div>
+<div class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full glass-panel-elevated flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex flex-col items-center md:items-start text-center md:text-left flex-1">
+<h2 class="font-headline text-3xl font-bold tracking-tight text-on-surface mb-1">Kai Silva</h2>
+<p class="text-primary font-medium text-sm mb-4">Sustainability Engineer &amp; Urban Innovator</p>
+<p class="text-on-surface-variant text-sm max-w-xl mb-6">Building resilient communities through technology and education. Passionate about climate action and data-driven solutions for urban environments.</p>
+<div class="flex flex-wrap justify-center md:justify-start gap-2">
+<span class="glass-panel-elevated px-3 py-1.5 rounded-full text-xs font-medium text-tertiary border-tertiary/20 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">eco</span> Climate
+                        </span>
+<span class="glass-panel-elevated px-3 py-1.5 rounded-full text-xs font-medium text-primary border-primary/20 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">terminal</span> Tech
+                        </span>
+<span class="glass-panel-elevated px-3 py-1.5 rounded-full text-xs font-medium text-secondary border-secondary/20 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">menu_book</span> Literacy
+                        </span>
+</div>
+</div>
+</div>
+<!-- Stats Card -->
+<div class="grid grid-cols-1 gap-4 col-span-1 md:col-span-4">
+<div class="glass-panel rounded-xl p-6 flex items-center justify-between glow-effect hover:bg-surface-bright/20 transition-colors">
+<div>
+<p class="text-on-surface-variant text-xs font-label uppercase tracking-wider mb-1">Projects</p>
+<p class="font-headline text-2xl font-semibold text-on-surface">14</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">folder_open</span>
+</div>
+</div>
+<div class="glass-panel rounded-xl p-6 flex items-center justify-between glow-effect hover:bg-surface-bright/20 transition-colors">
+<div>
+<p class="text-on-surface-variant text-xs font-label uppercase tracking-wider mb-1">Followers</p>
+<p class="font-headline text-2xl font-semibold text-on-surface">1,248</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">groups</span>
+</div>
+</div>
+<div class="glass-panel rounded-xl p-6 flex items-center justify-between glow-effect hover:bg-surface-bright/20 transition-colors">
+<div>
+<p class="text-on-surface-variant text-xs font-label uppercase tracking-wider mb-1">Impact Score</p>
+<p class="font-headline text-2xl font-semibold text-on-surface">9.4</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Container (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-center pb-4 px-4 pointer-events-none">
+<div class="rounded-full mb-6 mx-auto w-fit bg-surface-bright/40 backdrop-blur-3xl border border-primary/20 shadow-[0_0_40px_rgba(125,211,252,0.1)] flex items-center p-2 gap-2 pointer-events-auto">
+<a class="flex items-center justify-center text-on-surface-variant p-3 hover:text-primary transition-all active:scale-90 duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined">explore</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant p-3 hover:text-primary transition-all active:scale-90 duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant p-3 hover:text-primary transition-all active:scale-90 duration-150 rounded-full" href="#">
+<span class="material-symbols-outlined">workspace_premium</span>
+</a>
+<a class="flex items-center justify-center bg-primary/20 text-primary rounded-full p-3 hover:text-primary transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+</a>
+</div>
+</nav>
+</div>
+<script>
+    const canvas = document.getElementById('shader-bg');
+    const gl = canvas.getContext('webgl');
+
+    if (gl) {
+        const vertexShaderSource = `
+            attribute vec2 position;
+            varying vec2 v_texCoord;
+            void main() {
+                gl_Position = vec4(position, 0.0, 1.0);
+                v_texCoord = position * 0.5 + 0.5;
+            }
+        `;
+
+        const fragmentShaderSource = `
+            precision highp float;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+            varying vec2 v_texCoord;
+
+            // Simplex 2D noise
+            vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+
+            float snoise(vec2 v){
+              const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                       -0.577350269189626, 0.024390243902439);
+              vec2 i  = floor(v + dot(v, C.yy) );
+              vec2 x0 = v -   i + dot(i, C.xx);
+              vec2 i1;
+              i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+              vec4 x12 = x0.xyxy + C.xxzz;
+              x12.xy -= i1;
+              i = mod(i, 289.0);
+              vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+              + i.x + vec3(0.0, i1.x, 1.0 ));
+              vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+                dot(x12.zw,x12.zw)), 0.0);
+              m = m*m ;
+              m = m*m ;
+              vec3 x = 2.0 * fract(p * C.www) - 1.0;
+              vec3 h = abs(x) - 0.5;
+              vec3 ox = floor(x + 0.5);
+              vec3 a0 = x - ox;
+              m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+              vec3 g;
+              g.x  = a0.x  * x0.x  + h.x  * x0.y;
+              g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+              return 130.0 * dot(m, g);
+            }
+
+            void main() {
+                vec2 uv = v_texCoord;
+                float t = u_time * 0.2;
+                
+                // Ethereal Glacier palette
+                vec3 color1 = vec3(0.02, 0.04, 0.08); // Deep Navy
+                vec3 color2 = vec3(0.05, 0.10, 0.18); // Crystalline Slate
+                vec3 color3 = vec3(0.49, 0.83, 0.99); // Ice Blue (#7dd3fc)
+                
+                float n1 = snoise(uv * 2.0 + t);
+                float n2 = snoise(uv * 3.0 - t * 1.5);
+                float n3 = snoise(uv * 1.0 + vec2(t, -t));
+                
+                vec3 color = mix(color1, color2, n1 * 0.5 + 0.5);
+                color = mix(color, color3, clamp(n2 * n3 * 0.3, 0.0, 1.0));
+                
+                // Subtle gradient fade
+                color *= (1.2 - length(uv - 0.5));
+                
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+
+        function compileShader(gl, source, type) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            return shader;
+        }
+
+        const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
+        const fragmentShader = compileShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        const positions = [
+            -1.0, -1.0,
+             1.0, -1.0,
+            -1.0,  1.0,
+            -1.0,  1.0,
+             1.0, -1.0,
+             1.0,  1.0,
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+        const positionLocation = gl.getAttribLocation(program, "position");
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        const timeLocation = gl.getUniformLocation(program, "u_time");
+        const resolutionLocation = gl.getUniformLocation(program, "u_resolution");
+
+        function resizeCanvasToDisplaySize(canvas) {
+            const displayWidth  = canvas.clientWidth;
+            const displayHeight = canvas.clientHeight;
+            if (canvas.width  !== displayWidth || canvas.height !== displayHeight) {
+                canvas.width  = displayWidth;
+                canvas.height = displayHeight;
+            }
+        }
+
+        function render(time) {
+            time *= 0.001; 
+
+            resizeCanvasToDisplaySize(gl.canvas);
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+            gl.uniform1f(timeLocation, time);
+            gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+    }
+</script>
+</body></html>

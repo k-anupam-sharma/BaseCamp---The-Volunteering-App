@@ -1,4 +1,4 @@
-package com.example.basecamp.presentation.screens.organization
+﻿package com.example.basecamp.presentation.screens.organization
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,12 +13,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.basecamp.presentation.components.BrutalistButton
-import com.example.basecamp.presentation.components.BrutalistTextField
+import com.example.basecamp.presentation.components.GlacierButton
+import com.example.basecamp.presentation.components.AnimatedBackground
+import com.example.basecamp.presentation.components.GlacierTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateEventScreen(
+    eventId: String? = null,
     onNavigateBack: () -> Unit,
     viewModel: OrgViewModel = hiltViewModel()
 ) {
@@ -46,79 +48,81 @@ fun CreateEventScreen(
         }
     }
 
-    Column(
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedBackground()
+        Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F4F0))
+            
             .padding(24.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "CREATE EVENT",
+            text = "Create Event",
             fontSize = 32.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onBackground,
             letterSpacing = 1.sp
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(text = "TITLE", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Title", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
-        BrutalistTextField(value = title, onValueChange = { title = it }, placeholder = "e.g. Beach Cleanup")
+        GlacierTextField(value = title, onValueChange = { title = it }, placeholder = "e.g. Beach Cleanup")
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        Text(text = "DESCRIPTION", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Description", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
-        BrutalistTextField(value = description, onValueChange = { description = it }, placeholder = "Details about the event")
+        GlacierTextField(value = description, onValueChange = { description = it }, placeholder = "Details about the event")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "DATE", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Date", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
-        BrutalistTextField(value = date, onValueChange = { date = it }, placeholder = "MM/DD/YYYY")
+        GlacierTextField(value = date, onValueChange = { date = it }, placeholder = "MM/DD/YYYY")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "LOCATION", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Location", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
-        BrutalistTextField(value = location, onValueChange = { location = it }, placeholder = "e.g. Marine Drive")
+        GlacierTextField(value = location, onValueChange = { location = it }, placeholder = "e.g. Marine Drive")
 
         Spacer(modifier = Modifier.height(16.dp))
         
-        Text(text = "MAX VOLUNTEERS", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Max Volunteers", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
-        BrutalistTextField(value = maxVolunteers, onValueChange = { maxVolunteers = it }, placeholder = "e.g. 50")
+        GlacierTextField(value = maxVolunteers, onValueChange = { maxVolunteers = it }, placeholder = "e.g. 50")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "TYPE OF WORK", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Type of Work", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
-        BrutalistTextField(value = typeOfWork, onValueChange = { typeOfWork = it }, placeholder = "e.g. Physical labor, Teaching")
+        GlacierTextField(value = typeOfWork, onValueChange = { typeOfWork = it }, placeholder = "e.g. Physical labor, Teaching")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "PAYMENT / PERKS", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "PAYMENT / PERKS", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
-        BrutalistTextField(value = payment, onValueChange = { payment = it }, placeholder = "e.g. Unpaid, Free Lunch")
+        GlacierTextField(value = payment, onValueChange = { payment = it }, placeholder = "e.g. Unpaid, Free Lunch")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "DRESS CODE", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Dress Code", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
-        BrutalistTextField(value = dressCode, onValueChange = { dressCode = it }, placeholder = "e.g. Casual, Closed-toe shoes")
+        GlacierTextField(value = dressCode, onValueChange = { dressCode = it }, placeholder = "e.g. Casual, Closed-toe shoes")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "CONTACT DETAILS", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Contact Details", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
-        BrutalistTextField(value = contactDetails, onValueChange = { contactDetails = it }, placeholder = "e.g. +91 9876543210")
+        GlacierTextField(value = contactDetails, onValueChange = { contactDetails = it }, placeholder = "e.g. +91 9876543210")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "CAUSE", fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(text = "Cause", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
         Spacer(modifier = Modifier.height(8.dp))
         
         ExposedDropdownMenuBox(
@@ -126,7 +130,7 @@ fun CreateEventScreen(
             onExpandedChange = { expanded = !expanded }
         ) {
             Box(modifier = Modifier.menuAnchor()) {
-                BrutalistTextField(
+                GlacierTextField(
                     value = cause,
                     onValueChange = {},
                     placeholder = "Select a cause",
@@ -136,11 +140,11 @@ fun CreateEventScreen(
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(Color.White)
+                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 causes.forEach { selectedCause ->
                     DropdownMenuItem(
-                        text = { Text(selectedCause, fontWeight = FontWeight.Bold, color = Color.Black) },
+                        text = { Text(selectedCause, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground) },
                         onClick = {
                             cause = selectedCause
                             expanded = false
@@ -154,11 +158,11 @@ fun CreateEventScreen(
 
         if (createState is CreateEventState.Loading) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color.Black)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
             }
         } else {
-            BrutalistButton(
-                text = "SUBMIT EVENT",
+            GlacierButton(
+                text = "Submit Event",
                 onClick = { 
                     val maxVols = maxVolunteers.toIntOrNull() ?: 0
                     viewModel.createEvent(
@@ -166,7 +170,6 @@ fun CreateEventScreen(
                         typeOfWork, payment, dressCode, contactDetails
                     ) 
                 },
-                backgroundColor = Color(0xFFFAFF00), // Electric Yellow
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -175,13 +178,13 @@ fun CreateEventScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = (createState as CreateEventState.Error).message,
-                color = Color(0xFFFF007F), // Hot Pink
+                color = Color(0xFF7DD3FC), // Hot Pink
                 fontWeight = FontWeight.Bold
             )
         }
         
         Spacer(modifier = Modifier.height(32.dp))
     }
+    }
 }
-
 

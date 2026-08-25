@@ -1,4 +1,4 @@
-import java.util.Properties
+﻿import java.util.Properties
 import java.io.FileInputStream
 
 plugins {
@@ -58,6 +58,15 @@ android {
 }
 
 dependencies {
+    implementation("androidx.media3:media3-exoplayer:1.3.1")
+    implementation("androidx.media3:media3-ui:1.3.1")
+    
+    implementation("io.coil-kt:coil-gif:2.6.0")
+    
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    
+    implementation("com.airbnb.android:lottie-compose:6.3.0")
+    
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -81,6 +90,7 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.0.0")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.0.0")
     implementation("io.github.jan-tennert.supabase:compose-auth:2.0.0")
     implementation("io.ktor:ktor-client-android:2.3.5")
 
@@ -106,6 +116,12 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
+
+
+
+
+
 
 
 

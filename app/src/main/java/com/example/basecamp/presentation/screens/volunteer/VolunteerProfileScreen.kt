@@ -17,7 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.basecamp.presentation.components.BrutalistCard
+import com.example.basecamp.presentation.components.GlassPanel
+import com.example.basecamp.presentation.components.AnimatedBackground
 
 data class Badge(val id: String, val title: String, val icon: String)
 
@@ -25,27 +26,29 @@ data class Badge(val id: String, val title: String, val icon: String)
 fun VolunteerProfileScreen() {
     // Dummy data for now. In a real app, this would come from a ViewModel
     val totalHours = 142
-    val volunteerName = "ALEX JOHNSON"
+    val volunteerName = "Alex Johnson"
     val badges = listOf(
-        Badge("1", "EARLY BIRD", "🌅"),
-        Badge("2", "ECO WARRIOR", "🌳"),
+        Badge("1", "Early Bird", "🌅"),
+        Badge("2", "Eco Warrior", "🌳"),
         Badge("3", "TOP 10%", "🏆"),
         Badge("4", "50+ HOURS", "⭐"),
-        Badge("5", "TEAM PLAYER", "🤝"),
-        Badge("6", "FIRST RSVP", "⚡")
+        Badge("5", "Team Player", "🤝"),
+        Badge("6", "First RSVP", "⚡")
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF4F4F0)) // Off-White/Beige
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedBackground()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+             // Off-White/Beige
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // High-energy player card header
-        BrutalistCard(
+        GlassPanel(
             modifier = Modifier.fillMaxWidth(),
-            backgroundColor = Color.White
+            backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant
         ) {
             Column(
                 modifier = Modifier
@@ -54,10 +57,10 @@ fun VolunteerProfileScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "VOLUNTEER DOSSIER",
+                    text = "Volunteer Dossier",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.DarkGray,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(alpha=0.7f),
                     letterSpacing = 2.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -65,30 +68,24 @@ fun VolunteerProfileScreen() {
                     text = volunteerName,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.Black,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 Text(
-                    text = "TOTAL HOURS",
+                    text = "Total Hours",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.Black
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = "$totalHours",
                     fontSize = 80.sp, // Massive typography
                     fontWeight = FontWeight.Black,
-                    color = Color(0xFFFAFF00), // Electric Yellow
-                    style = TextStyle(
-                        shadow = Shadow(
-                            color = Color.Black,
-                            offset = Offset(6f, 6f),
-                            blurRadius = 0f
-                        )
-                    )
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary, // Electric Yellow
+                    style = TextStyle()
                 )
             }
         }
@@ -96,10 +93,10 @@ fun VolunteerProfileScreen() {
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "EARNED BADGES",
+            text = "Earned Badges",
             fontSize = 24.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = Color.Black,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.align(Alignment.Start)
         )
 
@@ -112,8 +109,8 @@ fun VolunteerProfileScreen() {
             modifier = Modifier.fillMaxSize()
         ) {
             items(badges) { badge ->
-                BrutalistCard(
-                    backgroundColor = Color(0xFFFF007F), // Hot Pink
+                GlassPanel(
+                    backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant, // Hot Pink
                     modifier = Modifier.aspectRatio(1f) // Square badges
                 ) {
                     Column(
@@ -130,7 +127,7 @@ fun VolunteerProfileScreen() {
                             text = badge.title,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = Color.Black,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
                             textAlign = TextAlign.Center,
                             letterSpacing = 1.sp
                         )
@@ -138,6 +135,7 @@ fun VolunteerProfileScreen() {
                 }
             }
         }
+    }
     }
 }
 

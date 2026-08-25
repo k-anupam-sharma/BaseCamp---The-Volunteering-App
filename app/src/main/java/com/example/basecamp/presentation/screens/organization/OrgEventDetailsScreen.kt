@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.basecamp.domain.model.Event
-import com.example.basecamp.presentation.components.BrutalistCard
-import com.example.basecamp.presentation.components.BrutalistButton
+import com.example.basecamp.presentation.components.GlassPanel
+import com.example.basecamp.presentation.components.GlacierButton
 import com.example.basecamp.presentation.screens.shared.EventChatSection
 import com.example.basecamp.presentation.screens.shared.EventChatViewModel
 import com.example.basecamp.presentation.screens.volunteer.DetailItem
@@ -50,21 +50,23 @@ fun OrgEventDetailsScreen(
         chatViewModel.loadComments(eventId)
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
+    com.example.basecamp.presentation.components.AnimatedBackground()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF4F4F0))
+            .background(Color.Transparent)
             .padding(16.dp)
     ) {
         IconButton(onClick = onNavigateBack) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.Black)
+            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
         }
         
         Spacer(modifier = Modifier.height(16.dp))
 
         if (event == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color.Black)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
             }
         } else {
             val validEvent = event!!
@@ -72,12 +74,12 @@ fun OrgEventDetailsScreen(
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = Color.Transparent,
-                contentColor = Color.Black,
+                contentColor = MaterialTheme.colorScheme.onBackground,
                 indicator = { tabPositions ->
                     if (selectedTab < tabPositions.size) {
                         SecondaryIndicator(
                             Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                            color = Color(0xFFFF007F), // Hot Pink
+                            color = Color(0xFF7DD3FC), // Hot Pink
                             height = 4.dp
                         )
                     }
@@ -86,17 +88,17 @@ fun OrgEventDetailsScreen(
                 Tab(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    text = { Text("DETAILS", fontWeight = FontWeight.ExtraBold) }
+                    text = { Text("Details", fontWeight = FontWeight.ExtraBold) }
                 )
                 Tab(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    text = { Text("CHAT", fontWeight = FontWeight.ExtraBold) }
+                    text = { Text("Chat", fontWeight = FontWeight.ExtraBold) }
                 )
                 Tab(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    text = { Text("VOLUNTEERS", fontWeight = FontWeight.ExtraBold) }
+                    text = { Text("Volunteers", fontWeight = FontWeight.ExtraBold) }
                 )
             }
             
@@ -112,32 +114,32 @@ fun OrgEventDetailsScreen(
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         item {
                             Text(
-                                text = validEvent.title.uppercase(),
+                                text = validEvent.title,
                                 fontSize = 28.sp,
                                 fontWeight = FontWeight.Black,
-                                color = Color.Black
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "BY ${validEvent.orgName.uppercase()}",
+                                text = "BY ${validEvent.orgName}",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.DarkGray
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             
-                            DetailItem(label = "DESCRIPTION", value = validEvent.description)
+                            DetailItem(label = "Description", value = validEvent.description)
                             DetailItem(label = "DATE & TIME", value = validEvent.date)
-                            DetailItem(label = "LOCATION", value = validEvent.location)
-                            DetailItem(label = "CAUSE", value = validEvent.cause)
-                            DetailItem(label = "TYPE OF WORK", value = validEvent.typeOfWork)
-                            DetailItem(label = "PAYMENT", value = validEvent.payment)
-                            DetailItem(label = "DRESS CODE", value = validEvent.dressCode)
-                            DetailItem(label = "CONTACT", value = validEvent.contactDetails)
+                            DetailItem(label = "Location", value = validEvent.location)
+                            DetailItem(label = "Cause", value = validEvent.cause)
+                            DetailItem(label = "Type of Work", value = validEvent.typeOfWork)
+                            DetailItem(label = "Payment", value = validEvent.payment)
+                            DetailItem(label = "Dress Code", value = validEvent.dressCode)
+                            DetailItem(label = "Contact", value = validEvent.contactDetails)
                             
                             Spacer(modifier = Modifier.height(16.dp))
                             
-                            BrutalistCard(backgroundColor = Color.White) {
+                            GlassPanel {
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Text(
                                         text = "CAPACITY: ${validEvent.maxVolunteers} VOLUNTEERS",
@@ -145,10 +147,9 @@ fun OrgEventDetailsScreen(
                                         fontSize = 18.sp
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
-                                    BrutalistButton(
-                                        text = "INCREASE CAPACITY",
-                                        onClick = { showAddCapacityDialog = true },
-                                        backgroundColor = Color(0xFFFAFF00), // Electric Yellow
+                                    GlacierButton(
+                                        text = "Increase Capacity",
+                                        onClick = { showAddCapacityDialog = true }, // Electric Yellow
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
@@ -156,10 +157,10 @@ fun OrgEventDetailsScreen(
                             
                             Spacer(modifier = Modifier.height(32.dp))
                             
-                            BrutalistButton(
-                                text = "DELETE EVENT",
+                            GlacierButton(
+                                text = "Delete Event",
                                 onClick = { showDeleteDialog = true },
-                                backgroundColor = Color(0xFFFF007F), // Hot Pink
+                                backgroundColor = Color(0xFF7DD3FC), // Hot Pink
                                 textColor = Color.White,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -171,7 +172,7 @@ fun OrgEventDetailsScreen(
                     if (showAddCapacityDialog) {
                         AlertDialog(
                             onDismissRequest = { showAddCapacityDialog = false },
-                            title = { Text("INCREASE CAPACITY", fontWeight = FontWeight.ExtraBold) },
+                            title = { Text("Increase Capacity", fontWeight = FontWeight.ExtraBold) },
                             text = {
                                 Column {
                                     Text("How many additional volunteers do you want to allow?")
@@ -192,12 +193,12 @@ fun OrgEventDetailsScreen(
                                         onNavigateBack() // Go back after updating (or refresh)
                                     }
                                 }) {
-                                    Text("ADD")
+                                    Text("Add")
                                 }
                             },
                             dismissButton = {
                                 TextButton(onClick = { showAddCapacityDialog = false }) {
-                                    Text("CANCEL")
+                                    Text("Cancel")
                                 }
                             }
                         )
@@ -206,7 +207,7 @@ fun OrgEventDetailsScreen(
                     if (showDeleteDialog) {
                         AlertDialog(
                             onDismissRequest = { showDeleteDialog = false },
-                            title = { Text("DELETE EVENT", fontWeight = FontWeight.ExtraBold) },
+                            title = { Text("Delete Event", fontWeight = FontWeight.ExtraBold) },
                             text = { Text("Are you sure you want to delete this event? This action cannot be undone.") },
                             confirmButton = {
                                 Button(
@@ -215,14 +216,14 @@ fun OrgEventDetailsScreen(
                                         showDeleteDialog = false
                                         onNavigateBack()
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F))
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7DD3FC))
                                 ) {
-                                    Text("DELETE", color = Color.White)
+                                    Text("Delete", color = Color.White)
                                 }
                             },
                             dismissButton = {
                                 TextButton(onClick = { showDeleteDialog = false }) {
-                                    Text("CANCEL", color = Color.Black)
+                                    Text("Cancel", color = MaterialTheme.colorScheme.onBackground)
                                 }
                             }
                         )
@@ -260,10 +261,10 @@ fun OrgEventDetailsScreen(
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "NO VOLUNTEERS YET",
+                                    text = "No volunteers yet",
                                     fontSize = 24.sp,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = Color.Black
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
@@ -278,13 +279,13 @@ fun OrgEventDetailsScreen(
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(volunteers) { (user, ticket) ->
-                                BrutalistCard(backgroundColor = Color.White, modifier = Modifier.padding(vertical = 8.dp)) {
+                                GlassPanel( modifier = Modifier.padding(vertical = 8.dp)) {
                                     Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
                                         Text(
-                                            text = user.name.uppercase(),
+                                            text = user.name,
                                             fontWeight = FontWeight.Black,
                                             fontSize = 20.sp,
-                                            color = Color.Black
+                                            color = MaterialTheme.colorScheme.onBackground
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         
@@ -298,7 +299,7 @@ fun OrgEventDetailsScreen(
                                             Box(modifier = Modifier.size(12.dp).background(statusColor))
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Text(
-                                                text = ticket.status.uppercase(),
+                                                text = ticket.status,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 14.sp
                                             )
@@ -323,7 +324,7 @@ fun OrgEventDetailsScreen(
                                                 Text(
                                                     text = "DURATION: $durationStr",
                                                     fontWeight = FontWeight.Bold,
-                                                    color = Color(0xFFFF007F) // Hot Pink
+                                                    color = Color(0xFF7DD3FC) // Hot Pink
                                                 )
                                             }
                                         }
@@ -336,4 +337,5 @@ fun OrgEventDetailsScreen(
             }
         }
     }
+}
 }

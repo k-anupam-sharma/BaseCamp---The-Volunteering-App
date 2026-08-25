@@ -1,4 +1,4 @@
-package com.example.basecamp.di
+﻿package com.example.basecamp.di
 
 import dagger.Module
 import dagger.Provides
@@ -8,9 +8,11 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -26,6 +28,7 @@ object SupabaseModule {
             supabaseUrl = supabaseUrl,
             supabaseKey = supabaseKey
         ) {
+            requestTimeout = 30.seconds
             defaultSerializer = KotlinXSerializer(
                 Json {
                     ignoreUnknownKeys = true
@@ -41,6 +44,10 @@ object SupabaseModule {
             }
             install(io.github.jan.supabase.compose.auth.ComposeAuth)
             install(Postgrest)
+            install(Storage)
         }
     }
 }
+
+
+

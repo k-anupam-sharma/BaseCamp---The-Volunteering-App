@@ -14,8 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.basecamp.presentation.components.BrutalistButton
-import com.example.basecamp.presentation.components.BrutalistTextField
+import com.example.basecamp.presentation.components.GlacierButton
+import com.example.basecamp.presentation.components.AnimatedBackground
+import com.example.basecamp.presentation.components.GlassPanel
+import com.example.basecamp.presentation.components.GlacierTextField
 
 @Composable
 fun SignupScreen(
@@ -43,9 +45,11 @@ fun SignupScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedBackground()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(Color(0xFFF4F4F0))
             .padding(24.dp),
@@ -53,10 +57,10 @@ fun SignupScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "JOIN BASECAMP",
+            text = "Join BaseCamp",
             fontSize = 36.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = Color.Black,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
             letterSpacing = 1.sp
         )
 
@@ -67,7 +71,7 @@ fun SignupScreen(
             text = "SELECT YOUR ROLE:",
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.align(Alignment.Start)
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -78,14 +82,14 @@ fun SignupScreen(
             val volColor = if (selectedRole == "Volunteer") Color(0xFFFAFF00) else Color.White
             val orgColor = if (selectedRole == "Organization") Color(0xFFFAFF00) else Color.White
 
-            BrutalistButton(
-                text = "VOLUNTEER",
+            GlacierButton(
+                text = "Volunteer",
                 onClick = { selectedRole = "Volunteer" },
                 backgroundColor = volColor,
                 modifier = Modifier.weight(1f)
             )
-            BrutalistButton(
-                text = "ORGANIZATION",
+            GlacierButton(
+                text = "Organization",
                 onClick = { selectedRole = "Organization" },
                 backgroundColor = orgColor,
                 modifier = Modifier.weight(1f)
@@ -95,26 +99,26 @@ fun SignupScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         if (selectedRole == "Volunteer") {
-            BrutalistTextField(
+            GlacierTextField(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = "FULL NAME"
+                placeholder = "Full name"
             )
             Spacer(modifier = Modifier.height(16.dp))
         } else {
-            BrutalistTextField(
+            GlacierTextField(
                 value = name,
                 onValueChange = { name = it },
-                placeholder = "ORGANIZATION NAME"
+                placeholder = "Organization name"
             )
             Spacer(modifier = Modifier.height(16.dp))
-            BrutalistTextField(
+            GlacierTextField(
                 value = phone,
                 onValueChange = { phone = it },
                 placeholder = "PHONE NUMBER (OPTIONAL)"
             )
             Spacer(modifier = Modifier.height(16.dp))
-            BrutalistTextField(
+            GlacierTextField(
                 value = website,
                 onValueChange = { website = it },
                 placeholder = "WEBSITE (OPTIONAL)"
@@ -122,30 +126,30 @@ fun SignupScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        BrutalistTextField(
+        GlacierTextField(
             value = email,
             onValueChange = { email = it },
-            placeholder = "EMAIL ADDRESS"
+            placeholder = "Email address"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        BrutalistTextField(
+        GlacierTextField(
             value = password,
             onValueChange = { password = it },
-            placeholder = "PASSWORD",
+            placeholder = "Password",
             isPassword = true
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         if (authState is AuthState.Loading) {
-            CircularProgressIndicator(color = Color.Black)
+            CircularProgressIndicator(color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
         } else {
             
 
-            BrutalistButton(
-                text = "SIGN UP",
+            GlacierButton(
+                text = "Sign Up",
                 onClick = { viewModel.signup(name, email, password, selectedRole, phone.takeIf { selectedRole == "Organization" }, website.takeIf { selectedRole == "Organization" }) },
                 backgroundColor = Color(0xFF00E5FF), // Bright Cyan for primary action
                 modifier = Modifier.fillMaxWidth()
@@ -153,11 +157,11 @@ fun SignupScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            BrutalistButton(
-                text = "CONTINUE WITH GOOGLE",
+            GlacierButton(
+                text = "Continue with Google",
                 onClick = { viewModel.loginWithGoogle() },
-                backgroundColor = Color.White,
-                textColor = Color.Black,
+                backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant,
+                textColor = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -166,19 +170,20 @@ fun SignupScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = (authState as AuthState.Error).message,
-                color = Color(0xFFFF007F), // Hot Pink
+                color = androidx.compose.material3.MaterialTheme.colorScheme.error, // Hot Pink
                 fontWeight = FontWeight.Bold
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        BrutalistButton(
-            text = "BACK TO LOGIN",
+        GlacierButton(
+            text = "Back to Login",
             onClick = onNavigateToLogin,
-            backgroundColor = Color.White,
+            backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier.fillMaxWidth()
         )
+    }
     }
 }
 

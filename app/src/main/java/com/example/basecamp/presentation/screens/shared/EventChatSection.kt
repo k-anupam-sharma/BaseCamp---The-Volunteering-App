@@ -1,4 +1,4 @@
-package com.example.basecamp.presentation.screens.shared
+﻿package com.example.basecamp.presentation.screens.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.basecamp.presentation.components.BrutalistCard
-import com.example.basecamp.presentation.components.BrutalistTextField
+import com.example.basecamp.presentation.components.GlassPanel
+import com.example.basecamp.presentation.components.GlacierTextField
 
 @Composable
 fun EventChatSection(
@@ -43,21 +43,21 @@ fun EventChatSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "COMMENTS",
+                text = "Comments",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "REFRESH",
+                text = "Refresh",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFFF007F), // Hot Pink
+                color = Color(0xFF7DD3FC), // Hot Pink
                 modifier = Modifier.clickable { onRefresh() }
             )
         }
         
-        HorizontalDivider(color = Color.Black, thickness = 2.dp)
+        HorizontalDivider(color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground, thickness = 2.dp)
         Spacer(modifier = Modifier.height(16.dp))
 
         // Comments List
@@ -65,22 +65,22 @@ fun EventChatSection(
             when (chatState) {
                 is ChatState.Loading -> {
                     CircularProgressIndicator(
-                        color = Color.Black,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
                 is ChatState.Error -> {
                     Text(
                         text = chatState.message,
-                        color = Color(0xFFFF007F),
+                        color = Color(0xFF7DD3FC),
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
                 is ChatState.Success -> {
                     if (chatState.comments.isEmpty()) {
                         Text(
-                            text = "NO COMMENTS YET",
-                            color = Color.Gray,
+                            text = "No comments yet",
+                            color = Color.LightGray,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -112,7 +112,7 @@ fun EventChatSection(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Input Area
-        BrutalistCard(backgroundColor = Color.White) {
+        GlassPanel {
             Column(modifier = Modifier.padding(16.dp)) {
                 if (replyingToId != null) {
                     Row(
@@ -124,13 +124,13 @@ fun EventChatSection(
                             text = "Replying to $replyingToName",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFF007F)
+                            color = Color(0xFF7DD3FC)
                         )
                         Text(
-                            text = "CANCEL",
+                            text = "Cancel",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Gray,
+                            color = Color.LightGray,
                             modifier = Modifier.clickable {
                                 replyingToId = null
                                 replyingToName = null
@@ -145,7 +145,7 @@ fun EventChatSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(modifier = Modifier.weight(1f)) {
-                        BrutalistTextField(
+                        GlacierTextField(
                             value = newCommentText,
                             onValueChange = { newCommentText = it },
                             placeholder = "Write a comment..."
@@ -165,7 +165,7 @@ fun EventChatSection(
                             .background(Color(0xFFFAFF00)) // Electric Yellow
                             .padding(8.dp)
                     ) {
-                        Icon(Icons.Default.Send, contentDescription = "Send", tint = Color.Black)
+                        Icon(Icons.Default.Send, contentDescription = "Send", tint = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
                     }
                 }
             }
@@ -186,7 +186,7 @@ fun CommentNode(
             .fillMaxWidth()
             .then(
                 if (level == 0) {
-                    Modifier.background(Color.White).padding(12.dp)
+                    Modifier.background(androidx.compose.material3.MaterialTheme.colorScheme.onBackground).padding(12.dp)
                 } else {
                     Modifier.padding(start = 16.dp, top = 12.dp)
                 }
@@ -203,7 +203,7 @@ fun CommentNode(
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(4.dp)
-                        .background(Color(0xFFFF007F)) // Hot Pink
+                        .background(Color(0xFF7DD3FC)) // Hot Pink
                 )
                 Spacer(modifier = Modifier.width(12.dp))
             }
@@ -213,10 +213,10 @@ fun CommentNode(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = commentNode.comment.userName.uppercase(),
+                        text = commentNode.comment.userName,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color.Black
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
                     )
                     
                     if (commentNode.comment.userId == eventOwnerId) {
@@ -227,10 +227,10 @@ fun CommentNode(
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = "ORGANIZER",
+                                text = "Organizer",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Black,
-                                color = Color.Black
+                                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
@@ -248,7 +248,7 @@ fun CommentNode(
                     Icon(
                         imageVector = if (commentNode.isLikedByMe) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Like",
-                        tint = if (commentNode.isLikedByMe) Color(0xFFFF007F) else Color.Gray,
+                        tint = if (commentNode.isLikedByMe) Color(0xFF7DD3FC) else Color.LightGray,
                         modifier = Modifier
                             .size(16.dp)
                             .clickable { commentNode.comment.id?.let { onLikeClick(it) } }
@@ -258,14 +258,14 @@ fun CommentNode(
                         text = "${commentNode.likes}",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Gray
+                        color = Color.LightGray
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "REPLY",
+                        text = "Reply",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.clickable {
                             commentNode.comment.id?.let { onReplyClick(it, commentNode.comment.userName) }
                         }
@@ -287,3 +287,4 @@ fun CommentNode(
         }
     }
 }
+

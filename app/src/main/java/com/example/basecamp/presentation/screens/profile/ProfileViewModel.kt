@@ -1,4 +1,4 @@
-package com.example.basecamp.presentation.screens.profile
+﻿package com.example.basecamp.presentation.screens.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +7,7 @@ import com.example.basecamp.domain.model.Ticket
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.storage.storage
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -126,4 +127,33 @@ class ProfileViewModel @Inject constructor(
             }
         }
     }
+    fun uploadProfilePhoto(uri: android.net.Uri, context: android.content.Context) {
+        viewModelScope.launch {
+            try {
+                val userId = supabaseClient.auth.currentSessionOrNull()?.user?.id ?: return@launch
+                val bytes = context.contentResolver.openInputStream(uri)?.readBytes() ?: return@launch
+                
+                // Upload to Supabase Storage (requires 'avatars' bucket)
+                val path = "${userId}/avatar_${System.currentTimeMillis()}.jpg"
+                val bucket = supabaseClient.storage["avatars"]
+                
+                bucket.upload(path, bytes, upsert = true)
+                
+                val publicUrl = bucket.publicUrl(path)
+                
+                // Update user profile in database
+                val updateData = mapOf("avatar_url" to publicUrl)
+                supabaseClient.postgrest["users"]
+                    .update(updateData) {
+                        filter { eq("id", userId) }
+                    }
+                
+                fetchProfile() // Refresh profile
+            } catch (e: Exception) {
+                // Ignore for now or handle error
+            }
+        }
+    }
 }
+
+

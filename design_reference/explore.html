@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Find your Impact</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#7dd3fc",
+                      "inverse-primary": "#0a4c6e",
+                      "inverse-on-surface": "#0a0e1a",
+                      "primary": "#7dd3fc",
+                      "on-primary": "#001f2e",
+                      "on-background": "#e0e8f0",
+                      "secondary-container": "#1a3a4e",
+                      "on-secondary-fixed": "#0d1f2b",
+                      "error-container": "#3d1414",
+                      "error": "#ff6b6b",
+                      "on-primary-fixed-variant": "#004d73",
+                      "surface-container-high": "#1a2438",
+                      "on-error": "#1a0000",
+                      "tertiary": "#c8a0f0",
+                      "surface-bright": "#1a2438",
+                      "outline": "#4a6070",
+                      "surface-dim": "#0f1524",
+                      "on-primary-container": "#c8eaff",
+                      "secondary-fixed-dim": "#88b4cc",
+                      "background": "#0a0e1a",
+                      "on-tertiary-fixed": "#1a002e",
+                      "on-secondary": "#001f2e",
+                      "tertiary-fixed-dim": "#c8a0f0",
+                      "tertiary-container": "#3d2060",
+                      "on-surface": "#e0e8f0",
+                      "surface-variant": "#1a2438",
+                      "primary-fixed": "#c8eaff",
+                      "surface-container-highest": "#202c42",
+                      "inverse-surface": "#e0e8f0",
+                      "surface": "#0f1524",
+                      "on-tertiary-fixed-variant": "#4d2a73",
+                      "on-tertiary": "#1a002e",
+                      "on-error-container": "#ffb3b3",
+                      "primary-fixed-dim": "#7dd3fc",
+                      "surface-container-lowest": "#0a0e1a",
+                      "surface-container": "#141c2e",
+                      "on-secondary-fixed-variant": "#2a4a5e",
+                      "secondary": "#88b4cc",
+                      "surface-container-low": "#111828",
+                      "tertiary-fixed": "#e8d0ff",
+                      "on-secondary-container": "#c0d8e8",
+                      "on-primary-fixed": "#001f2e",
+                      "on-surface-variant": "#a0b4c4",
+                      "primary-container": "#0e4d6e",
+                      "on-tertiary-container": "#e8d0ff",
+                      "secondary-fixed": "#c0d8e8",
+                      "outline-variant": "#2a3a48"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.5rem",
+                      "lg": "1rem",
+                      "xl": "1.5rem",
+                      "full": "9999px"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Inter"
+                      ],
+                      "display": [
+                              "Inter"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {}
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: transparent;
+            color: theme('colors.on-surface');
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(15, 21, 36, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(125, 211, 252, 0.1);
+        }
+
+        .glass-elevated {
+            background: rgba(15, 21, 36, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(125, 211, 252, 0.15);
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 30px rgba(125, 211, 252, 0.05);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="antialiased relative">
+<!-- Background WebGL Shader -->
+<div class="fixed inset-0 z-0 pointer-events-none opacity-100">
+<!-- STITCH_SHADER_START:ANIMATION_36 class="" -->
+<div class="" style="display:block;width:100%;height:100%;min-height:200px;">
+<canvas id="shader-canvas-ANIMATION_36" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_36');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+varying vec2 v_texCoord;
+
+// Simplex 2D noise
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+
+float snoise(vec2 v){
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+           -0.577350269189626, 0.024390243902439);
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod(i, 289.0);
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+  + i.x + vec3(0.0, i1.x, 1.0 ));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+    dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}
+
+void main() {
+    vec2 uv = v_texCoord;
+    float t = u_time * 0.2;
+    
+    // Ethereal Glacier palette
+    vec3 color1 = vec3(0.02, 0.04, 0.08); // Deep Navy
+    vec3 color2 = vec3(0.05, 0.10, 0.18); // Crystalline Slate
+    vec3 color3 = vec3(0.49, 0.83, 0.99); // Ice Blue (#7dd3fc)
+    
+    float n1 = snoise(uv * 2.0 + t);
+    float n2 = snoise(uv * 3.0 - t * 1.5);
+    float n3 = snoise(uv * 1.0 + vec2(t, -t));
+    
+    vec3 color = mix(color1, color2, n1 * 0.5 + 0.5);
+    color = mix(color, color3, clamp(n2 * n3 * 0.3, 0.0, 1.0));
+    
+    // Subtle gradient fade
+    color *= (1.2 - length(uv - 0.5));
+    
+    gl_FragColor = vec4(color, 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_36 -->
+</div>
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 glass-elevated shadow-[0_0_30px_rgba(125,211,252,0.05)] border-b-0">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/20">
+<img class="w-full h-full object-cover" data-alt="A highly detailed close-up portrait of a user avatar profile picture. The lighting is soft and professional, fitting an ethereal tech aesthetic. High resolution, sharp focus on the face." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA33zOA3RR8D8LiPfHlOHBvWF68yToRLX1a0ptbrAvT8aDIrvDe7VBQpmefXgUwT5ygth__6opAgCDnKYTDzaKI-xdBRlpXG-jt0xD8lO9xRmeYv0ipAeHGd38IxsvysRz2P4YV0AnWv_7JmJw2m7YCFMr-T7nUO_sEDp0E99ETyGj9M7v389xD-VZDV4JhY6X835IqskpM0S27hcBFEtvI5iCUIYoc7IQDt3Rt4hX8dDTSlsQLEANhqQ"/>
+</div>
+<span class="text-xl font-bold tracking-tighter text-primary">Glacier</span>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-primary/10 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="relative z-10 pt-24 pb-32 px-6 md:px-12 max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="mb-10 text-center md:text-left">
+<h1 class="font-headline font-semibold tracking-tight text-4xl md:text-5xl text-on-surface mb-3">Find your Impact</h1>
+<p class="text-on-surface-variant text-lg max-w-2xl">Discover opportunities to make a difference in your community and beyond.</p>
+</div>
+<!-- Search Bar -->
+<div class="glass-elevated rounded-xl p-2 mb-12 flex items-center gap-3 glow-effect max-w-3xl">
+<span class="material-symbols-outlined text-primary/70 ml-3">search</span>
+<input class="w-full bg-transparent border-none text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0 font-body text-base outline-none" placeholder="Search opportunities, locations, or causes..." type="text"/>
+<button class="bg-primary/20 hover:bg-primary/30 text-primary px-4 py-2 rounded-lg font-medium transition-colors border border-primary/20">
+                Filters
+            </button>
+</div>
+<!-- Categories (Horizontal Scroll) -->
+<div class="mb-12">
+<h2 class="font-headline font-semibold text-xl text-on-surface mb-4">Categories</h2>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4 -mx-6 px-6 md:mx-0 md:px-0">
+<button class="whitespace-nowrap px-6 py-3 glass-panel rounded-full text-primary border-primary/30 glow-effect font-medium hover:bg-primary/10 transition-colors">All Opportunities</button>
+<button class="whitespace-nowrap px-6 py-3 glass-panel rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors font-medium">Education</button>
+<button class="whitespace-nowrap px-6 py-3 glass-panel rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors font-medium">Environment</button>
+<button class="whitespace-nowrap px-6 py-3 glass-panel rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors font-medium">Health</button>
+<button class="whitespace-nowrap px-6 py-3 glass-panel rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors font-medium">Community</button>
+<button class="whitespace-nowrap px-6 py-3 glass-panel rounded-full text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors font-medium">Animals</button>
+</div>
+</div>
+<!-- Opportunities Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Card 1: Teach in Dharavi -->
+<div class="glass-panel rounded-2xl overflow-hidden group cursor-pointer hover:border-primary/30 transition-all duration-300">
+<div class="relative h-64 w-full">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A highly detailed cinematic shot of a modern, makeshift classroom in Dharavi. Sunlight filters through woven walls, illuminating eager students and a passionate teacher. The lighting is dramatic and inspiring, with a slightly cool, ethereal blue tint reflecting the UI aesthetic. High resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6pmV6DqM34cSgqIIyt2mdXhKmFJKOduNt_gw_AV2CIbHxu629ZzaSXtPqzKWdypABz5fp0cMpRFLgYNGqJ1IoNVJicQP13Fke0gC7Ila7B1oAcZJ58T_WMwQbe-c79KIyBtLFEBJv3TTZRsilkY782JdVQo8_J6wIv1dhTLRslVzmz0ZtB_yCGfbTOAm6O-T5vPbhQNnEi02qoUwkIlWJ7kE4NU1iXwC8LMi9_OBe5n_tLDyLezX8sQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent"></div>
+<div class="absolute top-4 right-4 glass-elevated px-3 py-1 rounded-full flex items-center gap-1 border-tertiary/30">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-tertiary font-medium text-sm">Featured</span>
+</div>
+</div>
+<div class="p-6 relative">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline font-semibold text-2xl text-on-surface group-hover:text-primary transition-colors">Teach in Dharavi</h3>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant text-sm mb-4">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">location_on</span>
+<span>Mumbai, India</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">schedule</span>
+<span>Weekends</span>
+</div>
+</div>
+<p class="text-on-surface-variant/80 text-sm mb-6 line-clamp-2">Empower the next generation by teaching basic computer skills and English to children in one of Asia's largest informal settlements.</p>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-surface object-cover" data-alt="A tiny portrait of a volunteer, cool ethereal lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSmQfRVlhT-MjuEU4wIQIfQhCfPNL0Hxlkx-S4pjoWDfO_vTXrU_zmWXbQFmKfiownoXf7y-5-hX7YPSrZxwptrUetssWPoQl5n_eNk603XUM2VAOb4_PgtibZxKO1ZeuwTS_a2aROAZuuevPygNi03DRdMFbFPDWihOeAJUXdFmZaYV3FAWikvHdnFz2-JwWO_vUVw6y_cMPcsZlL0LaFaQcxQa3IioWX5g-wJDHS5s94O8F6haKFdw"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface object-cover" data-alt="A tiny portrait of a second volunteer, cool ethereal lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh_27vqq9CoCKE5OrZ1qXmCRMLNoi4SiE4fksAC10aQdtIsWVIHdSeFc9uPaU4aqRQzNWm6GnVSQNY4sS5l_zvosnggp9JiZqqYvjOcvhieaRTlgpoeTUG5YJThXURNh02AuBBgzcwBSdXeLuen_Qi9f1ksEqokq74cNDQsgGHO8OcoDcH28wR3sqsR9OzYj4ob7bCa8-GW3MmHmrNx3OtgobTkZ4DqBGy8dz3rC3D-uFYvzV-y5FdIQ"/>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-bright flex items-center justify-center text-xs text-primary">+12</div>
+</div>
+<button class="bg-primary/20 hover:bg-primary/40 text-primary px-5 py-2 rounded-lg font-medium transition-all text-sm border border-primary/20">
+                            Apply Now
+                        </button>
+</div>
+</div>
+</div>
+<!-- Card 2: Beach Cleanup -->
+<div class="glass-panel rounded-2xl overflow-hidden group cursor-pointer hover:border-primary/30 transition-all duration-300">
+<div class="relative h-64 w-full">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A wide, sweeping shot of a beautiful coastline at dawn during a beach cleanup. Volunteers in the distance. The lighting is soft morning light mixed with an ethereal, high-tech ice-blue tint. The sand looks pristine where cleaned. Cinematic and atmospheric." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZz7HmAOM1ZynGIxP95ZlzStuAoYy0v_sXx7u9wRCzSmW1CerCso_tkLsCdE2Eyd21hyHSyzZFYU1zh5MrKmSg-c0QPuSgV3ZlDMctjjImpgLgKikgpr8tX1fRwbK2XFYXYOoJiLGGhocm9qie5YMR_3mL6_837XeNwnBJVCkgPAJ_q9Kk3elKf-d_cS6CJzAJVnZ4WIxM-d2Et5coaV3rUMxAQ7xtdLcII-e0dgegGl228xWNHp2NTQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent"></div>
+<div class="absolute top-4 right-4 glass-elevated px-3 py-1 rounded-full flex items-center gap-1 border-primary/30">
+<span class="material-symbols-outlined text-primary text-sm">event</span>
+<span class="text-primary font-medium text-sm">This Weekend</span>
+</div>
+</div>
+<div class="p-6 relative">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline font-semibold text-2xl text-on-surface group-hover:text-primary transition-colors">Coastal Revival Cleanup</h3>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">bookmark_border</span>
+</button>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant text-sm mb-4">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">location_on</span>
+<span>Pacific Coast</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base">group</span>
+<span>50 Spots Left</span>
+</div>
+</div>
+<p class="text-on-surface-variant/80 text-sm mb-6 line-clamp-2">Join our monthly initiative to remove plastic waste from the coastline and restore the natural habitat for local marine wildlife.</p>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-2">
+<img class="w-8 h-8 rounded-full border-2 border-surface object-cover" data-alt="A tiny portrait of a volunteer, cool ethereal lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzTTzrKLy_UDWTzV8NiuPuZFSmducXrIdDBEY9AyrDnVBSfVffar-dQUa3eY1BXn5fuirw4-f2XvrMXj8_Dmu9d2hjpq5mhQertMOIV57P1FrVj28j5I9N2vLwtygKZd1qxLFyEqXXNMbIDOc3T3LYbKA_1fo1mNZIP-Rb9iT9tAjrCXBW6pGaIKMuKI_NHtanT5Km3ImULJ_-kC9cavLkvv4uziI2L70nBPVoUD__7iI4z68usEzklw"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface object-cover" data-alt="A tiny portrait of a second volunteer, cool ethereal lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWvJ7s9azmieWXQF1nlYMeHSY3Vz887Tmtc2nUIgyWXErb2tZjJHjnQBMHIvVIFtoOGJm7Be-0fjwDm4uVPCWwDvXf2leSa9RzeBvs4BSbABIZuUhfmcSd_JfKjfAeKyI87iGl9vQCSDYz7WUykaHvdoUHJmg4KBxBmbj8N3q6ZeJj7Wq8L9X3kOwZxDCIlTJWq3isC26J83WV1Mc02j1C6h8_MWKmlRo-gaPsAixiXak6736SJK4rbg"/>
+<img class="w-8 h-8 rounded-full border-2 border-surface object-cover" data-alt="A tiny portrait of a third volunteer, cool ethereal lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHUzG8B58g736tsYWhsUfj3PE_ZSs-eNwR7KMa2Tzd3zgTOSFKqX4qgpP9SDvMctpn21AUsAZMXAq5fXbYr2bEc3bFKwe_UsAfpKZttt_e9HxDS1fyCFPKyaxpu-6Kpd8tTBOSqZ0HafAaext-xdtQFM_CTorFqX2Y48eRpDUuO1VW57ZJjsmDZTNf9rurkzebslG5GEjadyBEvV8qU3qMYx9um29CRdPkxsNAgd_YQ47YCTOm55cI-w"/>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-bright flex items-center justify-center text-xs text-primary">+45</div>
+</div>
+<button class="bg-primary/20 hover:bg-primary/40 text-primary px-5 py-2 rounded-lg font-medium transition-all text-sm border border-primary/20">
+                            Join Event
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-center pb-4 px-4 md:hidden">
+<div class="rounded-full mb-6 mx-auto w-fit glass-elevated flex items-center p-1">
+<button class="flex flex-col items-center justify-center bg-primary/20 text-primary rounded-full p-3 h-12 w-12 transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary p-3 h-12 w-12 transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined">leaderboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary p-3 h-12 w-12 transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined">workspace_premium</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary p-3 h-12 w-12 transition-all active:scale-90 duration-150">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</nav>
+</body></html>

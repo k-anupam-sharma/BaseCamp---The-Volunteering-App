@@ -1,4 +1,4 @@
-package com.example.basecamp.presentation.navigation
+﻿package com.example.basecamp.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -23,7 +23,9 @@ sealed class Screen(val route: String) {
     object VolunteerDashboard : Screen("volunteer_dashboard")
     object OrgDashboard : Screen("org_dashboard")
     object ScanTicket : Screen("scan_ticket")
-    object CreateEvent : Screen("create_event")
+    object CreateEvent : Screen("create_event?eventId={eventId}") {
+        fun createRoute(eventId: String? = null) = if (eventId != null) "create_event?eventId=$eventId" else "create_event"
+    }
     object EventDetails : Screen("event_details/{eventId}") {
         fun createRoute(eventId: String) = "event_details/$eventId"
     }
@@ -151,7 +153,7 @@ fun BaseCampNavGraph(
         composable(route = Screen.OrgDashboard.route) {
             OrgDashboardScreen(
                 onNavigateToScan = { navController.navigate(Screen.ScanTicket.route) },
-                onNavigateToCreate = { navController.navigate(Screen.CreateEvent.route) },
+                onNavigateToCreate = { eventId -> navController.navigate(Screen.CreateEvent.createRoute(eventId)) },
                 onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
                 onNavigateToEventDetails = { eventId -> navController.navigate(Screen.OrgEventDetails.createRoute(eventId)) }
             )
@@ -168,8 +170,10 @@ fun BaseCampNavGraph(
             )
         }
         
-        composable(route = Screen.CreateEvent.route) {
+        composable(route = Screen.CreateEvent.route, arguments = listOf(androidx.navigation.navArgument("eventId") { nullable = true })) { backStackEntry -> 
+            val eventId = backStackEntry.arguments?.getString("eventId")
             CreateEventScreen(
+                eventId = eventId,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -192,5 +196,6 @@ fun BaseCampNavGraph(
         }
     }
 }
+
 
 
