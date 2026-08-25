@@ -54,7 +54,7 @@ BaseCamp is built using a modern, scalable Android architecture:
 ## 📊 System Flowcharts
 
 ### 1. High-Level Architecture
-`mermaid
+```mermaid
 graph TD
     UI[Jetpack Compose UI] --> VM[ViewModels]
     VM --> Repo[Repository Layer]
@@ -65,10 +65,10 @@ graph TD
     
     UI --> CameraX[CameraX / Zxing]
     CameraX --> VM
-`
+```
 
 ### 2. User Authentication Flow
-`mermaid
+```mermaid
 sequenceDiagram
     participant User
     participant App
@@ -80,10 +80,10 @@ sequenceDiagram
     Supabase Auth-->>App: Auth Token
     App->>Database: Save FCM Device Token
     App-->>User: Navigate to Dashboard based on Role
-`
+```
 
 ### 3. The 2-Step Ticketing & Hardware Scanning Flow
-`mermaid
+```mermaid
 graph TD
     A[Volunteer unblurs QR] --> B[App starts 15s timer & 3s Polling]
     C[Org opens ScanTicketScreen] --> D[CameraX intercepts QR]
@@ -93,7 +93,7 @@ graph TD
     F -->|2nd Scan| H[Ticket Status: 'Attended' + Duration Calculated]
     G -.->|Auto-Refresh| B
     H -.->|Auto-Refresh| B
-`
+```
 
 ---
 
@@ -106,7 +106,7 @@ You will need a free [Supabase](https://supabase.com/) project to act as the bac
 1. Create a new project in Supabase.
 2. Go to the **SQL Editor** and run the following queries to build your tables and set up security:
 
-`sql
+```sql
 -- 1. Create Users Table
 create table public.users (
   id uuid primary key references auth.users(id),
@@ -161,22 +161,22 @@ create table public.comment_likes (
   user_id uuid not null references public.users(id),
   unique(comment_id, user_id)
 );
-`
+```
 
 ### 2. Configure Local API Keys
-For security, Supabase keys are not checked into GitHub. You must add them to a local.properties file.
+For security, Supabase keys are not checked into GitHub. You must add them to a `local.properties` file.
 
 1. Open the Android Studio project.
-2. In the root directory of the project, open (or create) the local.properties file.
+2. In the root directory of the project, open (or create) the `local.properties` file.
 3. Go to your Supabase Project Settings -> **API**.
-4. Add your **Project URL** and **anon public key** to local.properties like this:
+4. Add your **Project URL** and **anon public key** to `local.properties` like this:
 
-`properties
+```properties
 SUPABASE_URL="https://YOUR_PROJECT_ID.supabase.co"
 SUPABASE_KEY="YOUR_ANON_KEY"
-`
+```
 
 *Note: Android Studio will automatically generate BuildConfig fields from these properties.*
 
 ### 3. Gradle Distribution Note
-The gradle/wrapper/gradle-wrapper.properties has been updated to use a standard internet distribution url (https://services.gradle.org/distributions/gradle-8.9-bin.zip). If you were using a local ile:/// distribution URL, Android Studio should automatically download the standard version upon the first Gradle sync, ensuring the project builds cleanly for any contributor on GitHub!
+The `gradle/wrapper/gradle-wrapper.properties` has been updated to use a standard internet distribution url (`https://services.gradle.org/distributions/gradle-8.9-bin.zip`). If you were using a local `file:///` distribution URL, Android Studio should automatically download the standard version upon the first Gradle sync, ensuring the project builds cleanly for any contributor on GitHub!
