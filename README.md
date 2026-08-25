@@ -1,4 +1,4 @@
-﻿# BaseCamp: The Volunteering App ðŸ•ï¸
+﻿# BaseCamp: The Volunteering App ⛰️
 
 BaseCamp is a high-energy, modern platform designed to bridge the gap between passionate **Volunteers** and community-driven **Organizations**. 
 
@@ -6,36 +6,36 @@ Built entirely with a stunning **Dynamic Glassmorphic** design language and insp
 
 ---
 
-## ðŸŽ¯ Why did we make it?
+## 🛠️ Why did we make it?
 
-Currently in India, there is no dedicated platform for companies or organizations to find volunteersâ€”nor is there a reliable platform for individuals to find local events where they can volunteer. 
+Currently in India, there is no dedicated platform for companies or organizations to find volunteers—nor is there a reliable platform for individuals to find local events where they can volunteer. 
 
 The existing ecosystem relies heavily on:
 1. **Word-of-mouth** and personal referrals.
 2. **WhatsApp channels** that send out irregular, disorganized, and vague updates regarding volunteering events.
 
-BaseCamp was created to fix this fragmentation. We provide a centralized, common platform for both parties. By making the onboarding process incredibly easy, fun, and highly engaging through our Glassmorphic design, BaseCamp aims to solve the volunteering disconnect in Indiaâ€”while building a scalable foundation for future monetization.
+BaseCamp was created to fix this fragmentation. We provide a centralized, common platform for both parties. By making the onboarding process incredibly easy, fun, and highly engaging through our Glassmorphic design, BaseCamp aims to solve the volunteering disconnect in India—while building a scalable foundation for future monetization.
 
 ---
 
-## âš™ï¸ Key Features
+## 🚀 Key Features
 
-### For Volunteers ðŸ¤
+### For Volunteers 🙋
 1. **Discover**: Browse a real-time, auto-refreshing feed of local events categorized by cause using clean, horizontal scrolling pills (All Events, My RSVPs).
 2. **Secure Ticketing**: RSVP with a single tap. The app generates a **Secure QR Code Ticket** that is blurred by default. Tapping it starts a 15-second interactive reveal timer.
 3. **Two-Step Check-In**: Show your ticket to be scanned twice (Login and Logout). The app actively polls the server and instantly updates your status and displays your **total logged duration**.
 4. **Interactive Profile**: Upload a profile photo directly to Supabase Storage, watch your "Total Hours" climb, and unlock achievement badges on your Volunteer Dossier.
 5. **Interactive Chat**: Engage with other volunteers and organizers in the real-time event chat.
 
-### For Organizations ðŸ¢
+### For Organizations 🏢
 1. **Event Management**: Create, edit details, delete, and dynamically increase capacity for community events using a premium, Meetup-inspired card layout.
 2. **Hardware Scanning**: Access the built-in CameraX scanner to scan volunteer QR tickets at the door.
 3. **Real-time Live Sync**: The "Volunteers" tab auto-refreshes every 10 seconds. When you scan a ticket, it instantly registers the volunteer's check-in/check-out time and automatically calculates their volunteering duration.
-4. **Organizer Badges**: Chat directly with volunteers in the event threadâ€”your messages are highlighted with an exclusive "ORGANIZER" badge.
+4. **Organizer Badges**: Chat directly with volunteers in the event thread—your messages are highlighted with an exclusive "ORGANIZER" badge.
 
 ---
 
-## ðŸ›  Tech Stack
+## 💻 Tech Stack
 
 BaseCamp is built using a modern, scalable Android architecture:
 
@@ -51,10 +51,10 @@ BaseCamp is built using a modern, scalable Android architecture:
 
 ---
 
-## ðŸ—ºï¸ System Flowcharts
+## 📊 System Flowcharts
 
 ### 1. High-Level Architecture
-```mermaid
+`mermaid
 graph TD
     UI[Jetpack Compose UI] --> VM[ViewModels]
     VM --> Repo[Repository Layer]
@@ -65,10 +65,10 @@ graph TD
     
     UI --> CameraX[CameraX / Zxing]
     CameraX --> VM
-```
+`
 
 ### 2. User Authentication Flow
-```mermaid
+`mermaid
 sequenceDiagram
     participant User
     participant App
@@ -80,10 +80,10 @@ sequenceDiagram
     Supabase Auth-->>App: Auth Token
     App->>Database: Save FCM Device Token
     App-->>User: Navigate to Dashboard based on Role
-```
+`
 
 ### 3. The 2-Step Ticketing & Hardware Scanning Flow
-```mermaid
+`mermaid
 graph TD
     A[Volunteer unblurs QR] --> B[App starts 15s timer & 3s Polling]
     C[Org opens ScanTicketScreen] --> D[CameraX intercepts QR]
@@ -93,11 +93,11 @@ graph TD
     F -->|2nd Scan| H[Ticket Status: 'Attended' + Duration Calculated]
     G -.->|Auto-Refresh| B
     H -.->|Auto-Refresh| B
-```
+`
 
 ---
 
-## ðŸš€ Local Setup & Installation
+## ⚙️ Local Setup & Installation
 
 If you want to clone this repository and run BaseCamp locally, follow these steps to set up your environment and database!
 
@@ -106,7 +106,7 @@ You will need a free [Supabase](https://supabase.com/) project to act as the bac
 1. Create a new project in Supabase.
 2. Go to the **SQL Editor** and run the following queries to build your tables and set up security:
 
-```sql
+`sql
 -- 1. Create Users Table
 create table public.users (
   id uuid primary key references auth.users(id),
@@ -161,23 +161,22 @@ create table public.comment_likes (
   user_id uuid not null references public.users(id),
   unique(comment_id, user_id)
 );
-```
+`
 
 ### 2. Configure Local API Keys
-For security, Supabase keys are not checked into GitHub. You must add them to a `local.properties` file.
+For security, Supabase keys are not checked into GitHub. You must add them to a local.properties file.
 
 1. Open the Android Studio project.
-2. In the root directory of the project, open (or create) the `local.properties` file.
+2. In the root directory of the project, open (or create) the local.properties file.
 3. Go to your Supabase Project Settings -> **API**.
-4. Add your **Project URL** and **anon public key** to `local.properties` like this:
+4. Add your **Project URL** and **anon public key** to local.properties like this:
 
-```properties
+`properties
 SUPABASE_URL="https://YOUR_PROJECT_ID.supabase.co"
 SUPABASE_KEY="YOUR_ANON_KEY"
-```
+`
 
 *Note: Android Studio will automatically generate BuildConfig fields from these properties.*
 
 ### 3. Gradle Distribution Note
-The `gradle/wrapper/gradle-wrapper.properties` has been updated to use a standard internet distribution url (`https://services.gradle.org/distributions/gradle-8.9-bin.zip`). If you were using a local `file:///` distribution URL, Android Studio should automatically download the standard version upon the first Gradle sync, ensuring the project builds cleanly for any contributor on GitHub!
-
+The gradle/wrapper/gradle-wrapper.properties has been updated to use a standard internet distribution url (https://services.gradle.org/distributions/gradle-8.9-bin.zip). If you were using a local ile:/// distribution URL, Android Studio should automatically download the standard version upon the first Gradle sync, ensuring the project builds cleanly for any contributor on GitHub!
