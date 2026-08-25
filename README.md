@@ -1,56 +1,57 @@
-# BaseCamp: The Volunteering App 🏕️
+﻿# BaseCamp: The Volunteering App ðŸ•ï¸
 
 BaseCamp is a high-energy, modern platform designed to bridge the gap between passionate **Volunteers** and community-driven **Organizations**. 
 
-Built entirely with a strict **Neo-Brutalist** design language, BaseCamp rejects the standard, overly-polished corporate aesthetics in favor of raw, bold, and unapologetic UI components. With gamified profiles, instant QR-code ticketing, and real-time hardware scanning, BaseCamp makes community service engaging and frictionless.
+Built entirely with a stunning **Dynamic Glassmorphic** design language and inspired by industry-leading layout structures (like Meetup), BaseCamp combines immersive UI components layered over an animated hardware-accelerated space video background. With gamified profiles, instant QR-code ticketing, and real-time hardware scanning, BaseCamp makes community service engaging and frictionless.
 
 ---
 
-## 🎯 Why did we make it?
+## ðŸŽ¯ Why did we make it?
 
-Currently in India, there is no dedicated platform for companies or organizations to find volunteers—nor is there a reliable platform for individuals to find local events where they can volunteer. 
+Currently in India, there is no dedicated platform for companies or organizations to find volunteersâ€”nor is there a reliable platform for individuals to find local events where they can volunteer. 
 
 The existing ecosystem relies heavily on:
 1. **Word-of-mouth** and personal referrals.
 2. **WhatsApp channels** that send out irregular, disorganized, and vague updates regarding volunteering events.
 
-BaseCamp was created to fix this fragmentation. We provide a centralized, common platform for both parties. By making the onboarding process incredibly easy, fun, and highly engaging through our Neo-Brutalist design, BaseCamp aims to solve the volunteering disconnect in India—while building a scalable foundation for future monetization.
+BaseCamp was created to fix this fragmentation. We provide a centralized, common platform for both parties. By making the onboarding process incredibly easy, fun, and highly engaging through our Glassmorphic design, BaseCamp aims to solve the volunteering disconnect in Indiaâ€”while building a scalable foundation for future monetization.
 
 ---
 
-## ⚙️ Key Features
+## âš™ï¸ Key Features
 
-### For Volunteers 🤝
-1. **Discover**: Browse a real-time, auto-refreshing feed of local events categorized by cause.
+### For Volunteers ðŸ¤
+1. **Discover**: Browse a real-time, auto-refreshing feed of local events categorized by cause using clean, horizontal scrolling pills (All Events, My RSVPs).
 2. **Secure Ticketing**: RSVP with a single tap. The app generates a **Secure QR Code Ticket** that is blurred by default. Tapping it starts a 15-second interactive reveal timer.
 3. **Two-Step Check-In**: Show your ticket to be scanned twice (Login and Logout). The app actively polls the server and instantly updates your status and displays your **total logged duration**.
-4. **Gamification**: Watch your "Total Hours" climb and unlock achievement badges on your Volunteer Dossier.
+4. **Interactive Profile**: Upload a profile photo directly to Supabase Storage, watch your "Total Hours" climb, and unlock achievement badges on your Volunteer Dossier.
 5. **Interactive Chat**: Engage with other volunteers and organizers in the real-time event chat.
 
-### For Organizations 🏢
-1. **Event Management**: Create, delete, and dynamically increase capacity for community events.
+### For Organizations ðŸ¢
+1. **Event Management**: Create, edit details, delete, and dynamically increase capacity for community events using a premium, Meetup-inspired card layout.
 2. **Hardware Scanning**: Access the built-in CameraX scanner to scan volunteer QR tickets at the door.
 3. **Real-time Live Sync**: The "Volunteers" tab auto-refreshes every 10 seconds. When you scan a ticket, it instantly registers the volunteer's check-in/check-out time and automatically calculates their volunteering duration.
-4. **Organizer Badges**: Chat directly with volunteers in the event thread—your messages are highlighted with an exclusive "ORGANIZER" badge.
+4. **Organizer Badges**: Chat directly with volunteers in the event threadâ€”your messages are highlighted with an exclusive "ORGANIZER" badge.
 
 ---
 
-## 🛠 Tech Stack
+## ðŸ›  Tech Stack
 
 BaseCamp is built using a modern, scalable Android architecture:
 
 *   **Language**: [Kotlin](https://kotlinlang.org/)
-*   **UI Toolkit**: [Jetpack Compose](https://developer.android.com/jetpack/compose) (Custom Neo-Brutalist Modifiers)
+*   **UI Toolkit**: [Jetpack Compose](https://developer.android.com/jetpack/compose) (Custom Glassmorphism Modifiers)
+*   **Media**: [ExoPlayer (Media3)](https://developer.android.com/media/media3) for high-performance, hardware-accelerated looping video backgrounds.
 *   **Architecture**: MVVM (Model-View-ViewModel)
 *   **Dependency Injection**: [Dagger Hilt](https://dagger.dev/hilt/)
 *   **Routing**: Jetpack Navigation Compose
-*   **Backend as a Service (BaaS)**: [Supabase](https://supabase.com/) (PostgreSQL, Authentication) via the official Kotlin SDK.
+*   **Backend as a Service (BaaS)**: [Supabase](https://supabase.com/) (PostgreSQL, Authentication, and Storage) via the official Kotlin SDK.
 *   **Hardware Integration**: [Android CameraX](https://developer.android.com/training/camerax) & [Zxing Core](https://github.com/zxing/zxing) for real-time QR generation and decoding.
 *   **Push Notifications**: Firebase Cloud Messaging (FCM)
 
 ---
 
-## 🗺️ System Flowcharts
+## ðŸ—ºï¸ System Flowcharts
 
 ### 1. High-Level Architecture
 ```mermaid
@@ -96,7 +97,7 @@ graph TD
 
 ---
 
-## 🚀 Local Setup & Installation
+## ðŸš€ Local Setup & Installation
 
 If you want to clone this repository and run BaseCamp locally, follow these steps to set up your environment and database!
 
@@ -179,3 +180,4 @@ SUPABASE_KEY="YOUR_ANON_KEY"
 
 ### 3. Gradle Distribution Note
 The `gradle/wrapper/gradle-wrapper.properties` has been updated to use a standard internet distribution url (`https://services.gradle.org/distributions/gradle-8.9-bin.zip`). If you were using a local `file:///` distribution URL, Android Studio should automatically download the standard version upon the first Gradle sync, ensuring the project builds cleanly for any contributor on GitHub!
+
