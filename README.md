@@ -4,6 +4,20 @@ BaseCamp is a high-energy, modern platform designed to bridge the gap between pa
 
 Built entirely with a stunning **Dynamic Glassmorphic** design language and inspired by industry-leading layout structures (like Meetup), BaseCamp combines immersive UI components layered over an animated hardware-accelerated space video background. With gamified profiles, instant QR-code ticketing, and real-time hardware scanning, BaseCamp makes community service engaging and frictionless.
 
+
+---
+
+## ?? Latest Updates (v1.1.0)
+* **Smarter Notifications:** Volunteers now receive specific alerts telling them exactly what changed when an Organization updates an event.
+* **Cancel RSVPs:** Volunteers can now seamlessly cancel their RSVPs. They are prompted for a reason, which is automatically forwarded to the hosting Organization.
+* **Instant RSVP Alerts:** Organizations now receive instant notifications the moment a Volunteer RSVPs for their event. 
+* **Dynamic Comment Sync:** If a user updates their profile name, their new name instantly syncs across all their previous event comments.
+* **UI Polish:** 
+  * "My Badges" Gamification overhaul with glassmorphism matching.
+  * Unified bottom navigation spacing across roles.
+  * Sleek new Create Event button styling.
+  * Removed strict restrictions on Event creation forms.
+
 ---
 
 ## 🛠️ Why did we make it?
