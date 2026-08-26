@@ -116,6 +116,15 @@ class ProfileViewModel @Inject constructor(
                         filter { eq("id", userId) }
                     }
                     
+                    try {
+                        val commentUpdateData = mapOf("user_name" to name)
+                        supabaseClient.postgrest["comments"].update(commentUpdateData) {
+                            filter { eq("user_id", userId) }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    
                     _profileState.value = ProfileState.Success(updatedUser)
                     _updateState.value = true
                 }

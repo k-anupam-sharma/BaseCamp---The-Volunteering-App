@@ -57,6 +57,12 @@ fun VolunteerDashboardScreen(
 
     var selectedTab by remember { mutableStateOf("ALL") }
 
+    androidx.compose.runtime.LaunchedEffect(selectedTab) {
+        if (selectedTab == "NOTIFICATIONS") {
+            viewModel.fetchNotifications()
+        }
+    }
+
     val context = LocalContext.current
 
     LaunchedEffect(rsvpState) {
@@ -95,9 +101,10 @@ fun VolunteerDashboardScreen(
             ) {
                 Row(
                     modifier = Modifier
+                        .width(330.dp)
                         .skeuoCard(androidx.compose.foundation.shape.RoundedCornerShape(percent = 50))
                         .padding(horizontal = 8.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val iconTint = Color(0xFFC5C5D4)
@@ -187,10 +194,30 @@ fun VolunteerDashboardScreen(
                 }
             }
             is FeedState.Success -> {
-                val availableEvents = (feedState as FeedState.Success).availableEvents
-                val rsvpedEvents = (feedState as FeedState.Success).rsvpedEvents
-                
-                val eventsToShow = if (selectedTab == "ALL") availableEvents else rsvpedEvents
+                if (selectedTab == "NOTIFICATIONS") {
+                    val notifs by viewModel.notifications.collectAsState()
+                    if (notifs.isEmpty()) {
+                        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            androidx.compose.material3.Text("No notifications", fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
+                        }
+                    } else {
+                        androidx.compose.foundation.lazy.LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            items(notifs.size) { index ->
+                                val notif = notifs[index]
+                                androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth().skeuoCard(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).padding(16.dp)) {
+                                    androidx.compose.foundation.layout.Column {
+                                        androidx.compose.material3.Text(notif.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 18.sp)
+                                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(4.dp))
+                                        androidx.compose.material3.Text(notif.message, color = Color.LightGray)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    val availableEvents = (feedState as FeedState.Success).availableEvents
+                    val rsvpedEvents = (feedState as FeedState.Success).rsvpedEvents
+                    val eventsToShow = if (selectedTab == "ALL") availableEvents else rsvpedEvents
                 
                 if (eventsToShow.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -214,6 +241,7 @@ fun VolunteerDashboardScreen(
                         }
                     }
                 }
+            }
             }
             is FeedState.Error -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

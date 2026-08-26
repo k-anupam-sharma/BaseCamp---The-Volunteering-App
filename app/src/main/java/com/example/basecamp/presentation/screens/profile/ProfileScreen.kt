@@ -7,6 +7,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
@@ -300,9 +302,8 @@ fun ProfileScreen(
                 ) {
                     GAMIFICATION_BADGES.forEach { badge ->
                         val isUnlocked = rsvpCount >= badge.requiredRsvps
-                        val bgColor = if (isUnlocked) Color(badge.color) else Color.LightGray
-                        val textColor = if (isUnlocked) Color.White else Color.DarkGray
-                        val lockText = if (isUnlocked) "â˜…" else "ðŸ”’"
+                        val bgColor = if (isUnlocked) Color(badge.color) else Color(0x662B2B2B)
+                        val textColor = if (isUnlocked) Color.Black else Color.LightGray
 
                             GlassPanel(
                             modifier = Modifier.weight(1f).height(140.dp),
@@ -313,11 +314,11 @@ fun ProfileScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Text(
-                                    text = lockText,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = textColor
+                                Icon(
+                                    imageVector = if (isUnlocked) Icons.Filled.LockOpen else Icons.Filled.Lock,
+                                    contentDescription = if (isUnlocked) "Unlocked" else "Locked",
+                                    tint = textColor,
+                                    modifier = Modifier.size(24.dp)
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(

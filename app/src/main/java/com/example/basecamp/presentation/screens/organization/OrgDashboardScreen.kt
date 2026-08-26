@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
@@ -50,6 +51,12 @@ fun OrgDashboardScreen(
     val dashboardState by viewModel.dashboardState.collectAsState()
     var selectedTab by remember { mutableStateOf("DASHBOARD") }
 
+    androidx.compose.runtime.LaunchedEffect(selectedTab) {
+        if (selectedTab == "NOTIFICATIONS") {
+            viewModel.fetchNotifications()
+        }
+    }
+
         LaunchedEffect(Unit) {
         while (true) {
             kotlinx.coroutines.delay(5_000)
@@ -72,9 +79,10 @@ fun OrgDashboardScreen(
                 ) {
                     Row(
                         modifier = Modifier
+                            .width(330.dp)
                             .skeuoCard(RoundedCornerShape(percent = 50))
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         val iconTint = Color(0xFFC5C5D4)
@@ -103,9 +111,15 @@ fun OrgDashboardScreen(
                             onClick = { onNavigateToCreate(null) },
                             modifier = Modifier
                                 .size(64.dp)
-                                .skeuoButtonPrimary(CircleShape)
+                                .shadow(
+                                    elevation = 6.dp,
+                                    shape = CircleShape,
+                                    spotColor = Color(0x80000000),
+                                    ambientColor = Color(0x80000000)
+                                )
+                                .background(Color.White, CircleShape)
                         ) {
-                            Icon(Icons.Filled.Add, contentDescription = "Create Event", tint = Color.White, modifier = Modifier.size(32.dp))
+                            Icon(Icons.Filled.Add, contentDescription = "Create Event", tint = Color.Black, modifier = Modifier.size(32.dp))
                         }
 
                         // 4. Notifications
@@ -167,27 +181,49 @@ fun OrgDashboardScreen(
                         }
                     }
                     is DashboardState.Success -> {
-                        val eventsWithCounts = (dashboardState as DashboardState.Success).eventsWithCounts
-                        if (eventsWithCounts.isEmpty()) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = "No active events", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                        if (selectedTab == "NOTIFICATIONS") {
+                            val notifs by viewModel.notifications.collectAsState()
+                            if (notifs.isEmpty()) {
+                                androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    androidx.compose.material3.Text("No notifications", fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
+                                }
+                            } else {
+                                androidx.compose.foundation.lazy.LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    items(notifs.size) { index ->
+                                        val notif = notifs[index]
+                                        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth().skeuoCard(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).padding(16.dp)) {
+                                            androidx.compose.foundation.layout.Column {
+                                                androidx.compose.material3.Text(notif.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 18.sp)
+                                                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(4.dp))
+                                                androidx.compose.material3.Text(notif.message, color = Color.LightGray)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         } else {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                items(eventsWithCounts) { (event, count) ->
-                                    OrgEventCard(
-                                          event = event,
-                                          count = count,
-                                          viewModel = viewModel,
-                                          onNavigateToEventDetails = onNavigateToEventDetails,
-                                          onEditEvent = { onNavigateToCreate(it) }
-                                      )
+                            val eventsWithCounts = (dashboardState as DashboardState.Success).eventsWithCounts
+                            if (eventsWithCounts.isEmpty()) {
+                                androidx.compose.foundation.layout.Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    androidx.compose.material3.Text(text = "No active events", fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
+                                }
+                            } else {
+                                androidx.compose.foundation.lazy.LazyColumn(
+                                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    items(eventsWithCounts) { (event, count) ->
+                                        OrgEventCard(
+                                              event = event,
+                                              count = count,
+                                              viewModel = viewModel,
+                                              onNavigateToEventDetails = onNavigateToEventDetails,
+                                              onEditEvent = { onNavigateToCreate(it) }
+                                          )
+                                    }
                                 }
                             }
                         }

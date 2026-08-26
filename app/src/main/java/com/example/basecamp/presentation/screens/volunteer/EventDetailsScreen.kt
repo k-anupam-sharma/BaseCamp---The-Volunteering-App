@@ -51,6 +51,8 @@ fun EventDetailsScreen(
     val isRsvped = myTicket != null
 
     var showQrDialog by remember { mutableStateOf(false) }
+    var showCancelDialog by remember { mutableStateOf(false) }
+    var cancelReason by remember { mutableStateOf("") }
 
     LaunchedEffect(feedState, eventId) {
         if (feedState is FeedState.Success) {
@@ -156,13 +158,24 @@ fun EventDetailsScreen(
                             Text(if (isRsvped) "Show Ticket" else "Attend", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                         
-                        Button(
-                            onClick = { /* Contact functionality */ },
-                            modifier = Modifier.weight(1f).height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = lighterBrown)
-                        ) {
-                            Text("Contact", color = Color.White, fontWeight = FontWeight.Bold)
+                        if (isRsvped) {
+                            Button(
+                                onClick = { showCancelDialog = true },
+                                modifier = Modifier.weight(1f).height(56.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = androidx.compose.ui.graphics.Color.Red.copy(alpha = 0.8f))
+                            ) {
+                                Text("Cancel RSVP", color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            Button(
+                                onClick = { /* Contact functionality */ },
+                                modifier = Modifier.weight(1f).height(56.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = lighterBrown)
+                            ) {
+                                Text("Contact", color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                     
@@ -289,6 +302,41 @@ fun EventDetailsScreen(
                     confirmButton = {
                         TextButton(onClick = { showQrDialog = false }) {
                             Text("Close", color = Color(0xFFD3A270))
+                        }
+                    }
+                )
+            }
+            
+            if (showCancelDialog) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { showCancelDialog = false },
+                    title = { Text("Cancel RSVP") },
+                    text = {
+                        androidx.compose.foundation.layout.Column {
+                            Text("Are you sure you want to cancel your RSVP? Please provide a reason.")
+                            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
+                            androidx.compose.material3.OutlinedTextField(
+                                value = cancelReason,
+                                onValueChange = { cancelReason = it },
+                                label = { Text("Reason") },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        androidx.compose.material3.TextButton(onClick = {
+                            if (cancelReason.isNotBlank()) {
+                                viewModel.cancelRsvp(validEvent.id!!, cancelReason)
+                                showCancelDialog = false
+                                cancelReason = ""
+                            }
+                        }) {
+                            Text("Submit")
+                        }
+                    },
+                    dismissButton = {
+                        androidx.compose.material3.TextButton(onClick = { showCancelDialog = false }) {
+                            Text("Close")
                         }
                     }
                 )
