@@ -1,4 +1,4 @@
-﻿# BaseCamp: The Volunteering App ⛰️
+# BaseCamp: The Volunteering App ⛰️
 
 BaseCamp is a high-energy, modern platform designed to bridge the gap between passionate **Volunteers** and community-driven **Organizations**. 
 
@@ -115,7 +115,8 @@ create table public.users (
   role text not null check (role in ('Volunteer', 'Organization')),
   email text not null,
   phone text,
-  website text
+  website text,
+  profile_image_url text
 );
 
 -- 2. Create Events Table
@@ -163,7 +164,21 @@ create table public.comment_likes (
 );
 ```
 
-### 2. Configure Local API Keys
+```
+
+### 2. Supabase Storage Setup
+The app uses Supabase Storage for profile pictures.
+1. In your Supabase Dashboard, go to **Storage**.
+2. Click **New bucket** and name it exactly: `profile_pics` (lowercase).
+3. Set the bucket to **Public**.
+4. Go to the **Policies** tab for Storage.
+5. Create a new policy for `profile_pics`:
+   - Name: `Allow Uploads`
+   - Allowed Operations: **SELECT, INSERT, UPDATE**
+   - Target Roles: **authenticated**
+6. Save the policy.
+
+### 3. Configure Local API Keys
 For security, Supabase keys are not checked into GitHub. You must add them to a `local.properties` file.
 
 1. Open the Android Studio project.

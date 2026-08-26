@@ -1,4 +1,4 @@
-﻿package com.example.basecamp.presentation.screens.profile
+package com.example.basecamp.presentation.screens.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,16 +8,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
@@ -47,6 +48,20 @@ fun ProfileScreen(
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var website by remember { mutableStateOf("") }
+    
+    var showPhotoPickerMenu by remember { mutableStateOf(false) }
+    var cameraUri by remember { mutableStateOf<android.net.Uri?>(null) }
+
+    val isUploadingPhoto by viewModel.isUploadingPhoto.collectAsState()
+    val uploadError by viewModel.uploadError.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(uploadError) {
+        uploadError?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            viewModel.clearUploadError()
+        }
+    }
 
     LaunchedEffect(state) {
         if (state is ProfileState.Success) {
@@ -100,19 +115,107 @@ fun ProfileScreen(
             )
         }
 
+        val cameraLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.TakePicture()
+        ) { success ->
+            if (success) {
+                cameraUri?.let { viewModel.uploadProfilePhoto(it, context) }
+            }
+        }
+
+        val launcher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent()
+        ) { uri: android.net.Uri? ->
+            uri?.let { viewModel.uploadProfilePhoto(it, context) }
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
-        coil.compose.AsyncImage(
-            model = "https://api.dicebear.com/9.x/bottts-neutral/png?seed=${viewModel.currentUserId}",
-            contentDescription = "Large Profile Avatar",
-            modifier = Modifier
-                .size(120.dp)
-                .align(Alignment.CenterHorizontally)
-                .clip(CircleShape)
-                .background(Color.LightGray)
-        )
+        val avatarUrl = if (state is ProfileState.Success) {
+            (state as ProfileState.Success).user.profileImageUrl
+        } else null
 
-        Spacer(modifier = Modifier.height(32.dp))
+        val displayUrl = avatarUrl ?: "https://api.dicebear.com/9.x/bottts-neutral/png?seed=${viewModel.currentUserId}"
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            coil.compose.AsyncImage(
+                model = displayUrl,
+                contentDescription = "Large Profile Avatar",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(Color.LightGray)
+                    .then(
+                        if (!isUploadingPhoto) Modifier.clickable { showPhotoPickerMenu = true }
+                        else Modifier
+                    )
+            )
+            
+            if (isUploadingPhoto) {
+                CircularProgressIndicator(color = Color.White)
+            } else {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.2f))
+                        .clickable { showPhotoPickerMenu = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Edit Profile Picture",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+
+        if (showPhotoPickerMenu) {
+            Dialog(onDismissRequest = { showPhotoPickerMenu = false }) {
+                GlassPanel {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Profile Picture",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        GlacierButton(
+                            text = "Take Photo",
+                            onClick = {
+                                showPhotoPickerMenu = false
+                                val uri = viewModel.createTempFileUri(context)
+                                cameraUri = uri
+                                cameraLauncher.launch(uri)
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        GlacierButton(
+                            text = "Choose from Gallery",
+                            onClick = {
+                                showPhotoPickerMenu = false
+                                launcher.launch("image/*")
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         if (state is ProfileState.Loading) {
             CircularProgressIndicator(color = Color.White, modifier = Modifier.align(Alignment.CenterHorizontally))
