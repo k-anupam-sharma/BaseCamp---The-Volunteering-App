@@ -1,4 +1,4 @@
-﻿package com.example.basecamp.presentation.screens.organization
+package com.example.basecamp.presentation.screens.organization
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,6 +13,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import java.util.UUID
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
+import java.io.ByteArrayOutputStream
+import io.github.jan.supabase.storage.storage
 
 import com.example.basecamp.domain.model.Ticket
 
@@ -110,14 +116,121 @@ class OrgViewModel @Inject constructor(
     }
 
     fun createEvent(
-        title: String, description: String, date: String, cause: String, location: String, orgName: String, maxVolunteers: Int,
-        typeOfWork: String, payment: String, dressCode: String, contactDetails: String
+        title: String, description: String, date: String, cause: String, location: String, orgName: String, maxVolunteersStr: String,
+        typeOfWork: String, payment: String, dressCode: String, contactDetails: String, locationLink: String, isMultiDay: Boolean, endDate: String,
+        context: android.content.Context, bannerUri: android.net.Uri?
     ) {
         viewModelScope.launch {
             _createState.value = CreateEventState.Loading
             try {
+                // Check for empty required fields
+                if (title.isBlank() || description.isBlank() || date.isBlank() || location.isBlank() ||
+                    cause.isBlank() || maxVolunteersStr.isBlank() || typeOfWork.isBlank() ||
+                    payment.isBlank() || dressCode.isBlank() || contactDetails.isBlank() || locationLink.isBlank() ||
+                    (isMultiDay && endDate.isBlank())) {
+                    _createState.value = CreateEventState.Error("Please fill all required fields")
+                    return@launch
+                }
+
+                // Regex Validations
+                if (!title.matches(Regex("^[A-Za-z\\s]+$"))) {
+                    _createState.value = CreateEventState.Error("Title must contain only alphabets")
+                    return@launch
+                }
+                if (!description.matches(Regex("^[A-Za-z0-9\\s.,!?'-]+$"))) {
+                    _createState.value = CreateEventState.Error("Description contains invalid characters")
+                    return@launch
+                }
+                if (!date.matches(Regex("^[0-9\\-]+$"))) {
+                    _createState.value = CreateEventState.Error("Date must contain only numbers and -")
+                    return@launch
+                }
+                if (isMultiDay && !endDate.matches(Regex("^[0-9\\-]+$"))) {
+                    _createState.value = CreateEventState.Error("End Date must contain only numbers and -")
+                    return@launch
+                }
+                if (!location.matches(Regex("^[A-Za-z0-9\\s.,!?'-]+$"))) {
+                    _createState.value = CreateEventState.Error("Location contains invalid characters")
+                    return@launch
+                }
+                if (!android.util.Patterns.WEB_URL.matcher(locationLink).matches()) {
+                    _createState.value = CreateEventState.Error("Please enter a valid Location Link")
+                    return@launch
+                }
+                if (!maxVolunteersStr.matches(Regex("^[0-9]+$"))) {
+                    _createState.value = CreateEventState.Error("Max Volunteers must be a valid number")
+                    return@launch
+                }
+                if (!typeOfWork.matches(Regex("^[A-Za-z\\s]+$"))) {
+                    _createState.value = CreateEventState.Error("Type of work must contain only alphabets")
+                    return@launch
+                }
+                if (!payment.matches(Regex("^[A-Za-z0-9\\s]+$"))) {
+                    _createState.value = CreateEventState.Error("Payments/Perks must contain only alphabets and numbers")
+                    return@launch
+                }
+                if (!dressCode.matches(Regex("^[A-Za-z\\s]+$"))) {
+                    _createState.value = CreateEventState.Error("Dress code must contain only alphabets")
+                    return@launch
+                }
+                if (!contactDetails.matches(Regex("^[0-9\\s+\\-]+$"))) {
+                    _createState.value = CreateEventState.Error("Contact details must contain only numbers")
+                    return@launch
+                }
+
+                val maxVolunteers = maxVolunteersStr.toIntOrNull() ?: 0
+
+                var finalBannerUrl: String? = null
+                if (bannerUri != null) {
+                    try {
+                        val inputStream = context.contentResolver.openInputStream(bannerUri)
+                        val originalBitmap = BitmapFactory.decodeStream(inputStream)
+                        inputStream?.close()
+
+                        if (originalBitmap != null) {
+                            var rotatedBitmap = originalBitmap
+                            val exifInputStream = context.contentResolver.openInputStream(bannerUri)
+                            if (exifInputStream != null) {
+                                val exif = ExifInterface(exifInputStream)
+                                val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+                                
+                                val matrix = Matrix()
+                                when (orientation) {
+                                    ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+                                    ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+                                    ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+                                }
+                                
+                                if (!matrix.isIdentity) {
+                                    rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.width, originalBitmap.height, matrix, true)
+                                    originalBitmap.recycle()
+                                }
+                                exifInputStream.close()
+                            }
+
+                            val outputStream = ByteArrayOutputStream()
+                            rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+                            val compressedBytes = outputStream.toByteArray()
+
+                            val eventId = UUID.randomUUID().toString()
+                            val path = "${supabaseClient.auth.currentUserOrNull()?.id ?: "unknown"}/banner_${eventId}.jpg"
+                            val bucket = supabaseClient.storage["event_banners"]
+                            
+                            bucket.upload(path, compressedBytes, upsert = true)
+                            finalBannerUrl = bucket.publicUrl(path)
+                        }
+                    } catch (e: Exception) {
+                        // If image upload fails, you can either stop creation or continue without it.
+                        // We will stop creation.
+                        _createState.value = CreateEventState.Error("Failed to upload banner photo: ${e.message}")
+                        return@launch
+                    }
+                }
+
+                val eventId = UUID.randomUUID().toString()
+                
                 val newEvent = Event(
-                    id = UUID.randomUUID().toString(),
+                    id = eventId,
                     title = title,
                     description = description,
                     cause = cause,
@@ -129,7 +242,11 @@ class OrgViewModel @Inject constructor(
                     typeOfWork = typeOfWork,
                     payment = payment,
                     dressCode = dressCode,
-                    contactDetails = contactDetails
+                    contactDetails = contactDetails,
+                    locationLink = locationLink,
+                    isMultiDay = isMultiDay,
+                    endDate = if (isMultiDay) endDate else "",
+                    bannerUrl = finalBannerUrl
                 )
                 
                 supabaseClient.postgrest["events"].insert(newEvent)

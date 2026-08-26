@@ -1,4 +1,4 @@
-﻿package com.example.basecamp.presentation.screens.shared
+package com.example.basecamp.presentation.screens.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -162,10 +163,11 @@ fun EventChatSection(
                             }
                         },
                         modifier = Modifier
-                            .background(Color(0xFFFAFF00)) // Electric Yellow
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                            .background(Color(0xFFD3A270)) // Bronze tone
                             .padding(8.dp)
                     ) {
-                        Icon(Icons.Default.Send, contentDescription = "Send", tint = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
+                        Icon(Icons.Default.Send, contentDescription = "Send", tint = Color.White)
                     }
                 }
             }

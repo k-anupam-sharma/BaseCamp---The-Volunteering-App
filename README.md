@@ -130,7 +130,15 @@ create table public.events (
   location text not null,
   date text not null,
   org_name text not null,
-  max_volunteers integer default 0
+  max_volunteers integer default 0,
+  type_of_work text,
+  payment text,
+  dress_code text,
+  contact_details text,
+  location_link text,
+  is_multi_day boolean default false,
+  end_date text,
+  banner_url text
 );
 
 -- 3. Create Tickets Table
@@ -178,6 +186,8 @@ The app uses Supabase Storage for profile pictures.
    - Allowed Operations: **SELECT**
    - Target Roles: **public**
 7. Save both policies.
+
+8. **Repeat steps 2-7** to create a second bucket named exactly: `event_banners` (lowercase) for event cover photos. Ensure it is also set to **Public** and has both `Allow Uploads` and `Allow Public View` policies configured identically to the profile pictures.
 
 ### 3. Configure Local API Keys
 For security, Supabase keys are not checked into GitHub. You must add them to a `local.properties` file.

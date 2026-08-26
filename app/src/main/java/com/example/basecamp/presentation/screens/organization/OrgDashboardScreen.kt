@@ -1,4 +1,4 @@
-﻿package com.example.basecamp.presentation.screens.organization
+package com.example.basecamp.presentation.screens.organization
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -215,6 +215,18 @@ fun OrgEventCard(
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp)
         ) {
+            if (event.bannerUrl != null) {
+                coil.compose.AsyncImage(
+                    model = event.bannerUrl,
+                    contentDescription = "Event Banner",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
             Text(
                 text = event.date.uppercase(),
                 fontSize = 12.sp,

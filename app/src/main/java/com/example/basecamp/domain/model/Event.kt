@@ -18,5 +18,9 @@ data class Event(
     @SerialName("type_of_work") val typeOfWork: String = "",
     val payment: String = "",
     @SerialName("dress_code") val dressCode: String = "",
-    @SerialName("contact_details") val contactDetails: String = ""
+    @SerialName("contact_details") val contactDetails: String = "",
+    @SerialName("location_link") val locationLink: String = "",
+    @SerialName("is_multi_day") val isMultiDay: Boolean = false,
+    @SerialName("end_date") val endDate: String = "",
+    @SerialName("banner_url") val bannerUrl: String? = null
 )

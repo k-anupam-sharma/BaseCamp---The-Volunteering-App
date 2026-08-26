@@ -7,6 +7,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,14 +22,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.basecamp.domain.model.Event
-import com.example.basecamp.presentation.components.GlassPanel
-import com.example.basecamp.presentation.components.AnimatedBackground
 import com.example.basecamp.utils.QrCodeGenerator
 import org.json.JSONObject
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import com.example.basecamp.R
 import com.example.basecamp.presentation.screens.shared.EventChatSection
 import com.example.basecamp.presentation.screens.shared.EventChatViewModel
-import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 
 @Composable
 fun EventDetailsScreen(
@@ -40,9 +44,13 @@ fun EventDetailsScreen(
     var event by remember { mutableStateOf<Event?>(null) }
     
     val currentUserId = viewModel.currentUserId
-
-    var selectedTab by remember { mutableStateOf(0) }
     val chatState by chatViewModel.chatState.collectAsState()
+    
+    val myTickets by viewModel.myTickets.collectAsState()
+    val myTicket = myTickets.find { it.eventId == eventId }
+    val isRsvped = myTicket != null
+
+    var showQrDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(feedState, eventId) {
         if (feedState is FeedState.Success) {
@@ -51,82 +59,215 @@ fun EventDetailsScreen(
         }
     }
 
-    LaunchedEffect(eventId, selectedTab) {
-        if (selectedTab == 1) {
-            chatViewModel.loadComments(eventId)
-        }
+    LaunchedEffect(eventId) {
+        chatViewModel.loadComments(eventId)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-    com.example.basecamp.presentation.components.AnimatedBackground()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            
-            .padding(16.dp)
-    ) {
-        IconButton(onClick = onNavigateBack) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
+    val darkBrown = Color(0xFF332B25)
+    val lighterBrown = Color(0xFF4C3F35)
 
+    Box(modifier = Modifier.fillMaxSize().background(darkBrown)) {
         if (event == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
+                CircularProgressIndicator(color = Color.White)
             }
         } else {
             val validEvent = event!!
             
-            TabRow(
-                selectedTabIndex = selectedTab,
-                containerColor = Color.Transparent,
-                contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
-                indicator = { tabPositions ->
-                    if (selectedTab < tabPositions.size) {
-                        SecondaryIndicator(
-                            Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                            color = androidx.compose.material3.MaterialTheme.colorScheme.tertiary, // Hot Pink
-                            height = 4.dp
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                // Top Banner Box
+                Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
+                    if (validEvent.bannerUrl != null) {
+                        AsyncImage(
+                            model = validEvent.bannerUrl,
+                            contentDescription = "Banner",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
                         )
+                    } else {
+                        Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray))
+                    }
+                    
+                    // Gradient overlay to blend into background
+                    Box(modifier = Modifier.fillMaxSize().background(
+                        androidx.compose.ui.graphics.Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, darkBrown),
+                            startY = 500f
+                        )
+                    ))
+
+                    // Back button
+                    IconButton(
+                        onClick = onNavigateBack,
+                        modifier = Modifier.padding(16.dp).align(Alignment.TopStart)
+                            .background(Color.Black.copy(alpha = 0.4f), androidx.compose.foundation.shape.CircleShape)
+                    ) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 }
-            ) {
-                Tab(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    text = { Text("TICKET & DETAILS", fontWeight = FontWeight.ExtraBold) }
-                )
-                Tab(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    text = { Text("Chat", fontWeight = FontWeight.ExtraBold) }
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (selectedTab == 0) {
-                Column(
-                    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                ) {
-                    // Top section: QR Code Ticket
-                    GlassPanel(
-                        backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.background,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                
+                // Content Section
+                Column(modifier = Modifier.padding(horizontal = 24.dp).offset(y = (-40).dp)) {
+                    Text(
+                        text = validEvent.title,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        lineHeight = 34.sp
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = validEvent.date.uppercase(),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White.copy(alpha=0.7f)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    if (isRsvped) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Filled.LocationOn, contentDescription = null, tint = Color(0xFFD3A270), modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("RSVP Confirmed", color = Color(0xFFD3A270), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    // Action Buttons Row
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Button(
+                            onClick = { 
+                                if (!isRsvped) {
+                                    viewModel.rsvpForEvent(validEvent.id!!)
+                                } else {
+                                    showQrDialog = true
+                                }
+                            },
+                            modifier = Modifier.weight(1f).height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = lighterBrown)
                         ) {
-                            Text(
-                                text = "Your Ticket",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            
+                            Icon(Icons.Default.Email, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(if (isRsvped) "Show Ticket" else "Attend", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                        
+                        Button(
+                            onClick = { /* Contact functionality */ },
+                            modifier = Modifier.weight(1f).height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = lighterBrown)
+                        ) {
+                            Text("Contact", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(40.dp))
+                    
+                    // Location
+                    Text("Location", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(validEvent.location, fontSize = 15.sp, color = Color.White.copy(alpha=0.7f))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    if (validEvent.locationLink.isNotBlank()) {
+                        val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+                        Text(
+                            text = "View on Maps",
+                            color = Color(0xFFD3A270), // Bronze color to match the theme
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .clickable {
+                                    val url = validEvent.locationLink
+                                    val finalUrl = if (!url.startsWith("http://") && !url.startsWith("https://")) "https://$url" else url
+                                    try {
+                                        uriHandler.openUri(finalUrl)
+                                    } catch (e: Exception) {
+                                        // Silent catch if URL is completely invalid
+                                    }
+                                }
+                                .padding(vertical = 4.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(40.dp))
+                    
+                    // Hosts
+                    Text("Hosts", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier.size(48.dp).background(Color.White, androidx.compose.foundation.shape.CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(validEvent.orgName.take(1).uppercase(), fontWeight = FontWeight.Black, fontSize = 20.sp, color = Color.Black)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(validEvent.orgName, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                    }
+                    
+                    Spacer(modifier = Modifier.height(40.dp))
+                    
+                    // About
+                    Text("About the event", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = validEvent.description.ifBlank { "No description provided for this event." }, 
+                        fontSize = 15.sp, 
+                        color = Color.White.copy(alpha=0.8f), 
+                        lineHeight = 24.sp
+                    )
+                    
+                    Spacer(modifier = Modifier.height(40.dp))
+                    
+                    // Additional Details
+                    if (validEvent.typeOfWork.isNotBlank() || validEvent.payment.isNotBlank() || validEvent.dressCode.isNotBlank()) {
+                        Text("Additional Details", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        if (validEvent.typeOfWork.isNotBlank()) DetailItem("Type of Work", validEvent.typeOfWork)
+                        if (validEvent.payment.isNotBlank()) DetailItem("Perks / Payment", validEvent.payment)
+                        if (validEvent.dressCode.isNotBlank()) DetailItem("Dress Code", validEvent.dressCode)
+                        
+                        Spacer(modifier = Modifier.height(40.dp))
+                    }
+                    
+                    // Chat Section (Integrated at bottom)
+                    Text("Discussion", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(modifier = Modifier.fillMaxWidth().height(400.dp)) {
+                        EventChatSection(
+                            chatState = chatState,
+                            eventOwnerId = validEvent.orgId,
+                            onAddComment = { text, parentId ->
+                                chatViewModel.addComment(eventId, text, parentId)
+                            },
+                            onToggleLike = { commentId ->
+                                chatViewModel.toggleLike(commentId)
+                            },
+                            onRefresh = {
+                                chatViewModel.loadComments(eventId)
+                            }
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(48.dp))
+                }
+            }
+
+            // QR Code Dialog
+            if (showQrDialog && myTicket != null) {
+                AlertDialog(
+                    onDismissRequest = { showQrDialog = false },
+                    containerColor = Color(0xFF1E1E1E),
+                    title = {
+                        Text("Your Ticket", color = Color.White, fontWeight = FontWeight.Bold)
+                    },
+                    text = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                             val payload = JSONObject().apply {
                                 put("eventId", validEvent.id)
                                 put("volunteerId", currentUserId)
@@ -136,190 +277,24 @@ fun EventDetailsScreen(
                                 QrCodeGenerator.generateQrCode(payload)
                             }
                             
-                            val myTickets by viewModel.myTickets.collectAsState()
-                            val myTicket = myTickets.find { it.eventId == eventId }
-
-                            var isQrRevealed by remember { mutableStateOf(false) }
-                            var qrTimeRemaining by remember { mutableStateOf(15) }
-
-                            LaunchedEffect(isQrRevealed) {
-                                if (isQrRevealed) {
-                                    qrTimeRemaining = 15
-                                    while (qrTimeRemaining > 0) {
-                                        kotlinx.coroutines.delay(1000)
-                                        qrTimeRemaining -= 1
-                                        if (qrTimeRemaining % 3 == 0) {
-                                            viewModel.fetchEvents(showLoading = false)
-                                        }
-                                    }
-                                    isQrRevealed = false
-                                }
-                            }
-
-                            if (myTicket?.status != "Attended") {
-                                Box(
-                                    modifier = Modifier
-                                        .size(200.dp)
-                                        .clickable { if (!isQrRevealed) isQrRevealed = true },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Image(
-                                        bitmap = qrBitmap.asImageBitmap(),
-                                        contentDescription = "QR Code",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .blur(if (isQrRevealed) 0.dp else 16.dp)
-                                    )
-                                    if (!isQrRevealed) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(androidx.compose.material3.MaterialTheme.colorScheme.background.copy(alpha = 0.5f)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = "Tap to reveal",
-                                                fontWeight = FontWeight.Black,
-                                                fontSize = 18.sp,
-                                                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
-                                            )
-                                        }
-                                    } else {
-                                        Box(
-                                            modifier = Modifier
-                                                .align(Alignment.BottomCenter)
-                                                .background(androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
-                                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        ) {
-                                            Text(
-                                                text = "${qrTimeRemaining}s",
-                                                fontWeight = FontWeight.Bold,
-                                                color = androidx.compose.material3.MaterialTheme.colorScheme.background
-                                            )
-                                        }
-                                    }
-                                }
-                            } else {
-                                Text(
-                                    text = "Attended",
-                                    fontSize = 32.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary // Green
-                                )
-                            }
-                            
-                            if (myTicket != null) {
-                                Spacer(modifier = Modifier.height(24.dp))
-                                val statusColor = when (myTicket.status) {
-                                    "Checked In" -> androidx.compose.material3.MaterialTheme.colorScheme.primary
-                                    "Attended" -> androidx.compose.material3.MaterialTheme.colorScheme.primary
-                                    else -> androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant
-                                }
-                                
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(modifier = Modifier.size(16.dp).background(statusColor))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "STATUS: ${myTicket.status}",
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 18.sp
-                                    )
-                                }
-                                
-                                if (myTicket.status == "Checked In" && myTicket.checkInTime != null) {
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    var timeStr: String? = null
-                                    try {
-                                        val checkInInstant = java.time.Instant.parse(myTicket.checkInTime)
-                                        val localTime = java.time.LocalDateTime.ofInstant(checkInInstant, java.time.ZoneId.systemDefault())
-                                        timeStr = java.time.format.DateTimeFormatter.ofPattern("hh:mm a").format(localTime)
-                                    } catch (e: Exception) {}
-                                    
-                                    if (timeStr != null) {
-                                        Text(
-                                            text = "CHECKED IN AT: $timeStr",
-                                            fontWeight = FontWeight.Bold,
-                                            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(alpha=0.7f)
-                                        )
-                                    }
-                                } else if (myTicket.status == "Attended" && myTicket.checkInTime != null && myTicket.checkOutTime != null) {
-                                    var durationStr: String? = null
-                                    try {
-                                        val checkIn = java.time.Instant.parse(myTicket.checkInTime)
-                                        val checkOut = java.time.Instant.parse(myTicket.checkOutTime)
-                                        val durationMinutes = java.time.Duration.between(checkIn, checkOut).toMinutes()
-                                        val hours = durationMinutes / 60
-                                        val mins = durationMinutes % 60
-                                        durationStr = "${hours}h ${mins}m"
-                                    } catch (e: Exception) {}
-                                    
-                                    if (durationStr != null) {
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        Text(
-                                            text = "TOTAL DURATION: $durationStr",
-                                            fontSize = 20.sp,
-                                            fontWeight = FontWeight.Black,
-                                            color = androidx.compose.material3.MaterialTheme.colorScheme.tertiary // Hot Pink
-                                        )
-                                    }
-                                }
-                            }
+                            Image(
+                                bitmap = qrBitmap.asImageBitmap(),
+                                contentDescription = "QR Code",
+                                modifier = Modifier.size(200.dp).clip(RoundedCornerShape(8.dp))
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("Status: ${myTicket.status}", color = Color.White, fontWeight = FontWeight.Bold)
                         }
-                    }
-
-                    // Bottom section: Event Details
-                    Text(
-                        text = validEvent.title,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Black,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "BY ${validEvent.orgName}",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground.copy(alpha=0.7f)
-                    )
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    DetailItem(label = "Description", value = validEvent.description)
-                    DetailItem(label = "Date & Time", value = validEvent.date)
-                    DetailItem(label = "Location", value = validEvent.location)
-                    DetailItem(label = "Cause", value = validEvent.cause)
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider(color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground, thickness = 2.dp)
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    DetailItem(label = "Type of Work", value = validEvent.typeOfWork.ifBlank { "Not specified" })
-                    DetailItem(label = "Payment / Perks", value = validEvent.payment.ifBlank { "Not specified" })
-                    DetailItem(label = "Dress Code", value = validEvent.dressCode.ifBlank { "Not specified" })
-                    DetailItem(label = "Contact Details", value = validEvent.contactDetails.ifBlank { "Not specified" })
-                    
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
-            } else {
-                EventChatSection(
-                    chatState = chatState,
-                    eventOwnerId = validEvent.orgId,
-                    onAddComment = { text, parentId ->
-                        chatViewModel.addComment(eventId, text, parentId)
                     },
-                    onToggleLike = { commentId ->
-                        chatViewModel.toggleLike(commentId)
-                    },
-                    onRefresh = {
-                        chatViewModel.loadComments(eventId)
+                    confirmButton = {
+                        TextButton(onClick = { showQrDialog = false }) {
+                            Text("Close", color = Color(0xFFD3A270))
+                        }
                     }
                 )
             }
         }
     }
-}
-
-
 }
 
 @Composable
@@ -328,16 +303,15 @@ fun DetailItem(label: String, value: String) {
         Text(
             text = label,
             fontSize = 14.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = androidx.compose.material3.MaterialTheme.colorScheme.tertiary // Hot Pink
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFD3A270) // bronze tone
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = value,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
+            color = Color.White.copy(alpha=0.9f)
         )
     }
 }
-

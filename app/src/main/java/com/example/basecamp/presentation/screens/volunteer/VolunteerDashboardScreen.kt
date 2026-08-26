@@ -1,4 +1,4 @@
-﻿package com.example.basecamp.presentation.screens.volunteer
+package com.example.basecamp.presentation.screens.volunteer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -205,18 +205,8 @@ fun VolunteerDashboardScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(eventsToShow) { event ->
-                            val isRsvped = rsvpEventIds.contains(event.id)
                             EventCard(
                                 event = event, 
-                                isRsvped = isRsvped,
-                                onRsvpClick = { 
-                                    event.id?.let { viewModel.rsvpForEvent(it) } 
-                                },
-                                onShowQrClick = {
-                                    if (isRsvped) {
-                                        event.id?.let { onNavigateToEventDetails(it) }
-                                    }
-                                },
                                 onCardClick = {
                                     event.id?.let { onNavigateToEventDetails(it) }
                                 }
@@ -244,79 +234,59 @@ fun VolunteerDashboardScreen(
 
 
 @Composable
-fun EventCard(event: Event, isRsvped: Boolean, onRsvpClick: () -> Unit, onShowQrClick: () -> Unit, onCardClick: () -> Unit) {
-    androidx.compose.material3.Card(
+fun EventCard(event: Event, onCardClick: () -> Unit) {
+    com.example.basecamp.presentation.components.GlassPanel(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCardClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.White),
-        elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 2.dp)
+        backgroundColor = androidx.compose.ui.graphics.Color(0x662B2B2B)
     ) {
-        Column {
-            // Image Placeholder Header
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp)
-                    .background(
-                        androidx.compose.ui.graphics.Brush.horizontalGradient(
-                            listOf(androidx.compose.ui.graphics.Color(0xFFE0E0E0), androidx.compose.ui.graphics.Color(0xFFEEEEEE))
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Filled.LocationOn, contentDescription = null, tint = androidx.compose.ui.graphics.Color(0xFFBDBDBD), modifier = Modifier.size(48.dp))
-            }
-            // Content
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(event.date.uppercase(), color = androidx.compose.ui.graphics.Color(0xFFD32F2F), fontWeight = FontWeight.ExtraBold, fontSize = 12.sp) // Meetup red date
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(event.title, fontSize = 18.sp, fontWeight = FontWeight.Black, color = androidx.compose.ui.graphics.Color.Black)
-                Text("Hosted by " + event.orgName, fontSize = 14.sp, color = androidx.compose.ui.graphics.Color.DarkGray)
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp)
+        ) {
+            if (event.bannerUrl != null) {
+                coil.compose.AsyncImage(
+                    model = event.bannerUrl,
+                    contentDescription = "Event Banner",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
                 Spacer(modifier = Modifier.height(12.dp))
-                
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.LocationOn, contentDescription = "Location", tint = androidx.compose.ui.graphics.Color.Gray, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(event.location, fontSize = 14.sp, color = androidx.compose.ui.graphics.Color.Gray)
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                if (isRsvped) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "You're going!",
-                            color = androidx.compose.ui.graphics.Color(0xFF388E3C), // Green text
-                            fontWeight = FontWeight.Bold
-                        )
-                        androidx.compose.material3.Button(
-                            onClick = onShowQrClick,
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                                containerColor = androidx.compose.ui.graphics.Color(0xFFF3F4F6), 
-                                contentColor = androidx.compose.ui.graphics.Color.Black
-                            )
-                        ) {
-                            Text("Show QR")
-                        }
-                    }
-                } else {
-                    androidx.compose.material3.Button(
-                        onClick = onRsvpClick,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                            containerColor = androidx.compose.ui.graphics.Color(0xFFE53935), // Red button
-                            contentColor = androidx.compose.ui.graphics.Color.White
-                        )
-                    ) {
-                        Text("Attend", fontWeight = FontWeight.Bold)
-                    }
-                }
+            }
+            Text(
+                text = event.date.uppercase(),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = androidx.compose.ui.graphics.Color(0xFFD4D4D4)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = event.title,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = androidx.compose.ui.graphics.Color.White
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.LocationOn, contentDescription = "Location", tint = androidx.compose.ui.graphics.Color(0xFFB3B3B3), modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = event.location,
+                    fontSize = 12.sp,
+                    color = androidx.compose.ui.graphics.Color(0xFFB3B3B3)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Hosted by ${event.orgName}",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = androidx.compose.ui.graphics.Color.White
+                )
             }
         }
     }
