@@ -163,20 +163,21 @@ create table public.comment_likes (
   unique(comment_id, user_id)
 );
 ```
-
-```
-
 ### 2. Supabase Storage Setup
 The app uses Supabase Storage for profile pictures.
 1. In your Supabase Dashboard, go to **Storage**.
 2. Click **New bucket** and name it exactly: `profile_pics` (lowercase).
 3. Set the bucket to **Public**.
 4. Go to the **Policies** tab for Storage.
-5. Create a new policy for `profile_pics`:
+5. Create the first policy for `profile_pics` (For Uploading):
    - Name: `Allow Uploads`
    - Allowed Operations: **SELECT, INSERT, UPDATE**
    - Target Roles: **authenticated**
-6. Save the policy.
+6. Create the second policy for `profile_pics` (For Viewing):
+   - Name: `Allow Public View`
+   - Allowed Operations: **SELECT**
+   - Target Roles: **public**
+7. Save both policies.
 
 ### 3. Configure Local API Keys
 For security, Supabase keys are not checked into GitHub. You must add them to a `local.properties` file.
