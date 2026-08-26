@@ -1,4 +1,4 @@
-package com.example.basecamp.presentation.screens.volunteer
+﻿package com.example.basecamp.presentation.screens.volunteer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.basecamp.domain.model.Notification
+import com.example.basecamp.domain.model.User
 
 sealed class FeedState {
     object Loading : FeedState()
@@ -37,6 +39,9 @@ class FeedViewModel @Inject constructor(
     
     private val _rsvpState = MutableStateFlow<RsvpState>(RsvpState.Idle)
     val rsvpState: StateFlow<RsvpState> = _rsvpState.asStateFlow()
+
+    private val _notifications = MutableStateFlow<List<Notification>>(emptyList())
+    val notifications: StateFlow<List<Notification>> = _notifications.asStateFlow()
     
     private val _rsvpEventIds = MutableStateFlow<Set<String>>(emptySet())
     val rsvpEventIds: StateFlow<Set<String>> = _rsvpEventIds.asStateFlow()
@@ -52,6 +57,23 @@ class FeedViewModel @Inject constructor(
 
     init {
         fetchEvents()
+        fetchNotifications()
+    }
+
+    fun fetchNotifications() {
+        viewModelScope.launch {
+            try {
+                val userId = supabaseClient.auth.currentUserOrNull()?.id ?: return@launch
+                val notifs = supabaseClient.postgrest["notifications"].select {
+                    filter {
+                        eq("user_id", userId)
+                    }
+                }.decodeList<Notification>()
+                _notifications.value = notifs.sortedByDescending { it.createdAt }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun fetchEvents(showLoading: Boolean = true) {
@@ -107,14 +129,69 @@ class FeedViewModel @Inject constructor(
                 
                 supabaseClient.postgrest["tickets"].insert(newTicket)
                 _rsvpEventIds.value = _rsvpEventIds.value + eventId
-                _rsvpState.value = RsvpState.Success(eventId)
-                fetchEvents(showLoading = false)
+                  _rsvpState.value = RsvpState.Success(eventId)
+                  fetchEvents(showLoading = false)
+                  
+                  // Push RSVP notification to Organization
+                  try {
+                      val event = supabaseClient.postgrest["events"].select {
+                          filter { eq("id", eventId) }
+                      }.decodeSingle<Event>()
+                      
+                      val user = supabaseClient.postgrest["users"].select {
+                          filter { eq("id", userId) }
+                      }.decodeSingle<User>()
+                      
+                      val notif = Notification(
+                          userId = event.orgId,
+                          title = "New RSVP",
+                          message = "${user.name} RSVP'd for ${event.title}"
+                      )
+                      supabaseClient.postgrest["notifications"].insert(notif)
+                  } catch (e: Exception) {
+                      e.printStackTrace()
+                  }
             } catch (e: Exception) {
                 _rsvpState.value = RsvpState.Error(e.userFriendlyMessage("Failed to RSVP. You may have already RSVP'd."))
             }
         }
     }
     
+    fun cancelRsvp(eventId: String, reason: String) {
+        viewModelScope.launch {
+            try {
+                val userId = supabaseClient.auth.currentUserOrNull()?.id ?: return@launch
+                supabaseClient.postgrest["tickets"].delete {
+                    filter {
+                        eq("event_id", eventId)
+                        eq("volunteer_id", userId)
+                    }
+                }
+                
+                // Notify Organizer
+                val event = supabaseClient.postgrest["events"].select {
+                    filter { eq("id", eventId) }
+                }.decodeSingle<Event>()
+                
+                val user = supabaseClient.postgrest["users"].select {
+                    filter { eq("id", userId) }
+                }.decodeSingle<User>()
+                
+                val notif = Notification(
+                    userId = event.orgId,
+                    title = "RSVP Cancelled",
+                    message = "${user.name} cancelled their RSVP for ${event.title}'. Reason: $reason"
+                )
+                supabaseClient.postgrest["notifications"].insert(notif)
+                
+                _rsvpEventIds.value = _rsvpEventIds.value.filter { it != eventId }.toSet()
+                fetchEvents(showLoading = false)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun resetRsvpState() {
         _rsvpState.value = RsvpState.Idle
     }

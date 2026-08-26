@@ -1,4 +1,4 @@
-package com.example.basecamp.presentation.screens.organization
+﻿package com.example.basecamp.presentation.screens.organization
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream
 import io.github.jan.supabase.storage.storage
 
 import com.example.basecamp.domain.model.Ticket
+import com.example.basecamp.domain.model.Notification
 
 sealed class DashboardState {
     object Loading : DashboardState()
@@ -43,6 +44,9 @@ class OrgViewModel @Inject constructor(
     private val _createState = MutableStateFlow<CreateEventState>(CreateEventState.Idle)
     val createState: StateFlow<CreateEventState> = _createState.asStateFlow()
 
+    private val _notifications = MutableStateFlow<List<Notification>>(emptyList())
+    val notifications: StateFlow<List<Notification>> = _notifications.asStateFlow()
+
     private val _dashboardState = MutableStateFlow<DashboardState>(DashboardState.Loading)
     val dashboardState: StateFlow<DashboardState> = _dashboardState.asStateFlow()
 
@@ -54,6 +58,23 @@ class OrgViewModel @Inject constructor(
 
     init {
         fetchDashboardData()
+        fetchNotifications()
+    }
+
+    fun fetchNotifications() {
+        viewModelScope.launch {
+            try {
+                val userId = supabaseClient.auth.currentUserOrNull()?.id ?: return@launch
+                val notifs = supabaseClient.postgrest["notifications"].select {
+                    filter {
+                        eq("user_id", userId)
+                    }
+                }.decodeList<Notification>()
+                _notifications.value = notifs.sortedByDescending { it.createdAt }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun fetchEventVolunteers(eventId: String) {
@@ -124,6 +145,8 @@ class OrgViewModel @Inject constructor(
         viewModelScope.launch {
             _createState.value = CreateEventState.Loading
             try {
+                val oldEvent = if (eventId != null) getEventById(eventId) else null
+                
                 // Check for empty required fields
                 if (title.isBlank() || description.isBlank() || date.isBlank() || location.isBlank() ||
                     cause.isBlank() || maxVolunteersStr.isBlank() || typeOfWork.isBlank() ||
@@ -133,51 +156,7 @@ class OrgViewModel @Inject constructor(
                     return@launch
                 }
 
-                // Regex Validations
-                if (!title.matches(Regex("^[A-Za-z\\s]+$"))) {
-                    _createState.value = CreateEventState.Error("Title must contain only alphabets")
-                    return@launch
-                }
-                if (!description.matches(Regex("^[A-Za-z0-9\\s.,!?'-]+$"))) {
-                    _createState.value = CreateEventState.Error("Description contains invalid characters")
-                    return@launch
-                }
-                if (!date.matches(Regex("^[0-9\\-]+$"))) {
-                    _createState.value = CreateEventState.Error("Date must contain only numbers and -")
-                    return@launch
-                }
-                if (isMultiDay && !endDate.matches(Regex("^[0-9\\-]+$"))) {
-                    _createState.value = CreateEventState.Error("End Date must contain only numbers and -")
-                    return@launch
-                }
-                if (!location.matches(Regex("^[A-Za-z0-9\\s.,!?'-]+$"))) {
-                    _createState.value = CreateEventState.Error("Location contains invalid characters")
-                    return@launch
-                }
-                if (!android.util.Patterns.WEB_URL.matcher(locationLink).matches()) {
-                    _createState.value = CreateEventState.Error("Please enter a valid Location Link")
-                    return@launch
-                }
-                if (!maxVolunteersStr.matches(Regex("^[0-9]+$"))) {
-                    _createState.value = CreateEventState.Error("Max Volunteers must be a valid number")
-                    return@launch
-                }
-                if (!typeOfWork.matches(Regex("^[A-Za-z\\s]+$"))) {
-                    _createState.value = CreateEventState.Error("Type of work must contain only alphabets")
-                    return@launch
-                }
-                if (!payment.matches(Regex("^[A-Za-z0-9\\s]+$"))) {
-                    _createState.value = CreateEventState.Error("Payments/Perks must contain only alphabets and numbers")
-                    return@launch
-                }
-                if (!dressCode.matches(Regex("^[A-Za-z\\s]+$"))) {
-                    _createState.value = CreateEventState.Error("Dress code must contain only alphabets")
-                    return@launch
-                }
-                if (!contactDetails.matches(Regex("^[0-9\\s+\\-]+$"))) {
-                    _createState.value = CreateEventState.Error("Contact details must contain only numbers")
-                    return@launch
-                }
+                // Removed strict regex restrictions for better usability
 
                 val maxVolunteers = maxVolunteersStr.toIntOrNull() ?: 0
 
@@ -251,6 +230,39 @@ class OrgViewModel @Inject constructor(
                 )
                 
                 supabaseClient.postgrest["events"].upsert(newEvent)
+                
+                if (eventId != null && oldEvent != null) {
+                    val changedFields = mutableListOf<String>()
+                    if (oldEvent.title != title) changedFields.add("Title")
+                    if (oldEvent.description != description) changedFields.add("Description")
+                    if (oldEvent.cause != cause) changedFields.add("Cause")
+                    if (oldEvent.location != location) changedFields.add("Location")
+                    if (oldEvent.date != date) changedFields.add("Date")
+                    if (oldEvent.typeOfWork != typeOfWork) changedFields.add("Type Of Work")
+                    if (oldEvent.payment != payment) changedFields.add("Payment")
+                    if (oldEvent.dressCode != dressCode) changedFields.add("Dress Code")
+                    if (oldEvent.contactDetails != contactDetails) changedFields.add("Contact Details")
+                    
+                    val changesText = if (changedFields.isEmpty()) "details" else changedFields.joinToString(", ")
+                    
+                    try {
+                        val tickets = supabaseClient.postgrest["tickets"]
+                            .select { filter { eq("event_id", eventId) } }
+                            .decodeList<Ticket>()
+                        val org = supabaseClient.auth.currentUserOrNull()?.userMetadata?.get("full_name")?.toString()?.replace("\"", "") ?: "The Organization"
+                        tickets.forEach { ticket ->
+                            val notif = Notification(
+                                userId = ticket.volunteerId,
+                                title = "Event Updated",
+                                message = "$org has updated the $changesText for the event: $title"
+                            )
+                            supabaseClient.postgrest["notifications"].insert(notif)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                
                 _createState.value = CreateEventState.Success
                 fetchDashboardData()
             } catch (e: Exception) {
@@ -280,6 +292,8 @@ class OrgViewModel @Inject constructor(
         viewModelScope.launch {
             _createState.value = CreateEventState.Loading
             try {
+                val oldEvent = getEventById(eventId)
+                
                 // Update the event
                 val updateData = mapOf(
                     "title" to title,
@@ -293,6 +307,33 @@ class OrgViewModel @Inject constructor(
                         filter { eq("id", eventId) }
                     }
                 
+                try {
+                    val changedFields = mutableListOf<String>()
+                    if (oldEvent != null) {
+                        if (oldEvent.title != title) changedFields.add("Title")
+                        if (oldEvent.description != description) changedFields.add("Description")
+                        if (oldEvent.cause != cause) changedFields.add("Cause")
+                        if (oldEvent.location != location) changedFields.add("Location")
+                        if (oldEvent.date != date) changedFields.add("Date")
+                    }
+                    val changesText = if (changedFields.isEmpty()) "details" else changedFields.joinToString(", ")
+                    
+                    val tickets = supabaseClient.postgrest["tickets"]
+                        .select { filter { eq("event_id", eventId) } }
+                        .decodeList<Ticket>()
+                    val orgName = supabaseClient.auth.currentUserOrNull()?.userMetadata?.get("full_name")?.toString()?.replace("\"", "") ?: "The Organization"
+                    tickets.forEach { ticket ->
+                        val notif = Notification(
+                            userId = ticket.volunteerId,
+                            title = "Event Updated",
+                            message = " has updated the  for the event: "
+                        )
+                        supabaseClient.postgrest["notifications"].insert(notif)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
                 _createState.value = CreateEventState.Success
                 fetchDashboardData() // Refresh list
             } catch (e: Exception) {
