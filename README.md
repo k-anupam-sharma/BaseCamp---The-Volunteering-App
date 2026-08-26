@@ -60,7 +60,8 @@ graph TD
     VM --> Repo[Repository Layer]
     Repo --> Hilt[Hilt DI Container]
     
-    Repo --> Supabase[(Supabase Backend)]
+    Repo --> SupabaseDB[(Supabase Database)]
+    Repo --> SupabaseStorage[(Supabase Storage)]
     Repo --> FCM[Firebase Cloud Messaging]
     
     UI --> CameraX[CameraX / Zxing]
@@ -93,6 +94,24 @@ graph TD
     F -->|2nd Scan| H[Ticket Status: 'Attended' + Duration Calculated]
     G -.->|Auto-Refresh| B
     H -.->|Auto-Refresh| B
+```
+
+### 4. Image Processing & Storage Flow
+```mermaid
+sequenceDiagram
+    participant User as Org/User
+    participant App
+    participant ImageProcessor as Image Utils
+    participant Storage as Supabase Storage
+    participant DB as Supabase DB
+
+    User->>App: Selects Image (Banner / Profile Pic)
+    App->>ImageProcessor: Compress & Fix EXIF Rotation
+    ImageProcessor-->>App: Processed ByteArray
+    App->>Storage: Upload Image to Bucket
+    Storage-->>App: Returns Public URL
+    App->>DB: Save Record with Image URL
+    DB-->>App: Success
 ```
 
 ---
