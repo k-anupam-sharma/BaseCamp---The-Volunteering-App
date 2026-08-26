@@ -256,8 +256,13 @@ fun EventCard(event: Event, onCardClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
+            val displayDate = if (event.isMultiDay && event.endDate.isNotBlank()) {
+                "${event.date} - ${event.endDate}".uppercase()
+            } else {
+                event.date.uppercase()
+            }
             Text(
-                text = event.date.uppercase(),
+                text = displayDate,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = androidx.compose.ui.graphics.Color(0xFFD4D4D4)

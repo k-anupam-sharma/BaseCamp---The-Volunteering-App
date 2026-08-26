@@ -47,18 +47,18 @@ fun EventChatSection(
                 text = "Comments",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
+                color = Color.White
             )
             Text(
                 text = "Refresh",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF7DD3FC), // Hot Pink
+                color = Color(0xFFD3A270), // Bronze tone
                 modifier = Modifier.clickable { onRefresh() }
             )
         }
         
-        HorizontalDivider(color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground, thickness = 2.dp)
+        HorizontalDivider(color = Color.White.copy(alpha = 0.5f), thickness = 2.dp)
         Spacer(modifier = Modifier.height(16.dp))
 
         // Comments List
@@ -83,7 +83,7 @@ fun EventChatSection(
                             text = "No comments yet",
                             color = Color.LightGray,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.align(Alignment.Center)
+                            modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp)
                         )
                     } else {
                         LazyColumn(
@@ -125,7 +125,7 @@ fun EventChatSection(
                             text = "Replying to $replyingToName",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF7DD3FC)
+                            color = Color(0xFFD3A270)
                         )
                         Text(
                             text = "Cancel",
@@ -188,7 +188,7 @@ fun CommentNode(
             .fillMaxWidth()
             .then(
                 if (level == 0) {
-                    Modifier.background(androidx.compose.material3.MaterialTheme.colorScheme.onBackground).padding(12.dp)
+                    Modifier.background(Color(0xFF4A4239), androidx.compose.foundation.shape.RoundedCornerShape(12.dp)).padding(12.dp)
                 } else {
                     Modifier.padding(start = 16.dp, top = 12.dp)
                 }
@@ -205,7 +205,7 @@ fun CommentNode(
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(4.dp)
-                        .background(Color(0xFF7DD3FC)) // Hot Pink
+                        .background(Color(0xFFD3A270)) // Bronze tone
                 )
                 Spacer(modifier = Modifier.width(12.dp))
             }
@@ -218,21 +218,21 @@ fun CommentNode(
                         text = commentNode.comment.userName,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
+                        color = Color.White
                     )
                     
                     if (commentNode.comment.userId == eventOwnerId) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
-                                .background(Color(0xFFFAFF00)) // Electric Yellow
+                                .background(Color(0xFFD3A270)) // Bronze
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = "Organizer",
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Black,
-                                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
+                                color = Color.White
                             )
                         }
                     }
@@ -241,7 +241,7 @@ fun CommentNode(
                 Text(
                     text = commentNode.comment.text,
                     fontSize = 14.sp,
-                    color = Color.DarkGray
+                    color = Color.LightGray
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
@@ -250,7 +250,7 @@ fun CommentNode(
                     Icon(
                         imageVector = if (commentNode.isLikedByMe) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Like",
-                        tint = if (commentNode.isLikedByMe) Color(0xFF7DD3FC) else Color.LightGray,
+                        tint = if (commentNode.isLikedByMe) Color(0xFFD3A270) else Color.LightGray,
                         modifier = Modifier
                             .size(16.dp)
                             .clickable { commentNode.comment.id?.let { onLikeClick(it) } }
@@ -267,7 +267,7 @@ fun CommentNode(
                         text = "Reply",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
+                        color = Color.White,
                         modifier = Modifier.clickable {
                             commentNode.comment.id?.let { onReplyClick(it, commentNode.comment.userName) }
                         }

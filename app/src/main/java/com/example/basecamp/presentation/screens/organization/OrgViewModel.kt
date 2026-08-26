@@ -116,6 +116,7 @@ class OrgViewModel @Inject constructor(
     }
 
     fun createEvent(
+        eventId: String? = null,
         title: String, description: String, date: String, cause: String, location: String, orgName: String, maxVolunteersStr: String,
         typeOfWork: String, payment: String, dressCode: String, contactDetails: String, locationLink: String, isMultiDay: Boolean, endDate: String,
         context: android.content.Context, bannerUri: android.net.Uri?
@@ -212,8 +213,8 @@ class OrgViewModel @Inject constructor(
                             rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
                             val compressedBytes = outputStream.toByteArray()
 
-                            val eventId = UUID.randomUUID().toString()
-                            val path = "${supabaseClient.auth.currentUserOrNull()?.id ?: "unknown"}/banner_${eventId}.jpg"
+                            val imageEventId = eventId ?: UUID.randomUUID().toString()
+                            val path = "${supabaseClient.auth.currentUserOrNull()?.id ?: "unknown"}/banner_${imageEventId}.jpg"
                             val bucket = supabaseClient.storage["event_banners"]
                             
                             bucket.upload(path, compressedBytes, upsert = true)
@@ -227,10 +228,10 @@ class OrgViewModel @Inject constructor(
                     }
                 }
 
-                val eventId = UUID.randomUUID().toString()
+                val finalEventId = eventId ?: UUID.randomUUID().toString()
                 
                 val newEvent = Event(
-                    id = eventId,
+                    id = finalEventId,
                     title = title,
                     description = description,
                     cause = cause,
@@ -249,7 +250,7 @@ class OrgViewModel @Inject constructor(
                     bannerUrl = finalBannerUrl
                 )
                 
-                supabaseClient.postgrest["events"].insert(newEvent)
+                supabaseClient.postgrest["events"].upsert(newEvent)
                 _createState.value = CreateEventState.Success
                 fetchDashboardData()
             } catch (e: Exception) {
@@ -258,12 +259,14 @@ class OrgViewModel @Inject constructor(
         }
     }
     
-        fun getEvent(eventId: String): Event? {
-        val state = _dashboardState.value
-        if (state is DashboardState.Success) {
-            return state.eventsWithCounts.find { it.first.id == eventId }?.first
+    suspend fun getEventById(eventId: String): Event? {
+        return try {
+            supabaseClient.postgrest["events"].select {
+                filter { eq("id", eventId) }
+            }.decodeSingleOrNull<Event>()
+        } catch (e: Exception) {
+            null
         }
-        return null
     }
 
     fun updateEvent(

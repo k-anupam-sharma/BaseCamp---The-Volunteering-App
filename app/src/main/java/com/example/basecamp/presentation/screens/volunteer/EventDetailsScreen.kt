@@ -78,7 +78,7 @@ fun EventDetailsScreen(
                 // Top Banner Box
                 Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
                     if (validEvent.bannerUrl != null) {
-                        AsyncImage(
+                        coil.compose.AsyncImage(
                             model = validEvent.bannerUrl,
                             contentDescription = "Banner",
                             modifier = Modifier.fillMaxSize(),

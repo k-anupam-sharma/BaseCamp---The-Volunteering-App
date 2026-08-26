@@ -227,8 +227,13 @@ fun OrgEventCard(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
+            val displayDate = if (event.isMultiDay && event.endDate.isNotBlank()) {
+                "${event.date} - ${event.endDate}".uppercase()
+            } else {
+                event.date.uppercase()
+            }
             Text(
-                text = event.date.uppercase(),
+                text = displayDate,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = androidx.compose.ui.graphics.Color(0xFFD4D4D4)
@@ -269,13 +274,7 @@ fun OrgEventCard(
                     )
                 }
                 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    androidx.compose.material3.IconButton(
-                        onClick = { event.id?.let { viewModel.addVolunteerSpots(it, event.maxVolunteers, 10) } },
-                        modifier = Modifier.size(36.dp).background(androidx.compose.ui.graphics.Color(0x40FFFFFF), CircleShape)
-                    ) {
-                        Icon(Icons.Filled.Add, contentDescription = "Add Spots", tint = androidx.compose.ui.graphics.Color.White)
-                    }
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     androidx.compose.material3.IconButton(
                         onClick = { event.id?.let { onEditEvent(it) } },
                         modifier = Modifier.size(36.dp).background(androidx.compose.ui.graphics.Color(0x40FFFFFF), CircleShape)

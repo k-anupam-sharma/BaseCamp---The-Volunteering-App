@@ -63,6 +63,29 @@ fun CreateEventScreen(
     
     val causes = listOf("Environment", "Education", "Health", "Community", "Other")
     var expanded by remember { mutableStateOf(false) }
+    
+    var existingBannerUrl by remember { mutableStateOf<String?>(null) }
+    
+    LaunchedEffect(eventId) {
+        if (eventId != null) {
+            viewModel.getEventById(eventId)?.let { event ->
+                title = event.title
+                description = event.description
+                date = event.date
+                location = event.location
+                cause = event.cause
+                maxVolunteers = event.maxVolunteers.toString()
+                locationLink = event.locationLink
+                isMultiDay = event.isMultiDay
+                endDate = event.endDate
+                typeOfWork = event.typeOfWork
+                payment = event.payment
+                dressCode = event.dressCode
+                contactDetails = event.contactDetails
+                existingBannerUrl = event.bannerUrl
+            }
+        }
+    }
 
     val createState by viewModel.createState.collectAsState()
 
@@ -83,7 +106,7 @@ fun CreateEventScreen(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "Create Event",
+            text = if (eventId != null) "Update Event" else "Create Event",
             fontSize = 32.sp,
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.onBackground
@@ -103,7 +126,14 @@ fun CreateEventScreen(
                 .clickable { launcher.launch("image/*") },
             contentAlignment = Alignment.Center
         ) {
-            if (bannerUri != null) {
+            if (bannerUri == null && existingBannerUrl != null) {
+                AsyncImage(
+                    model = existingBannerUrl,
+                    contentDescription = "Event Banner",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else if (bannerUri != null) {
                 AsyncImage(
                     model = bannerUri,
                     contentDescription = "Event Banner",
@@ -267,12 +297,13 @@ fun CreateEventScreen(
             }
         } else {
             GlacierButton(
-                text = "Submit Event",
+                text = if (eventId != null) "Update Event" else "Submit Event",
                 onClick = { 
                     viewModel.createEvent(
-                        title, description, date, cause, location, "My Organization", maxVolunteers,
-                        typeOfWork, payment, dressCode, contactDetails, locationLink, isMultiDay, endDate,
-                        context, bannerUri
+                        eventId = eventId,
+                        title = title, description = description, date = date, cause = cause, location = location, orgName = "My Organization", maxVolunteersStr = maxVolunteers,
+                        typeOfWork = typeOfWork, payment = payment, dressCode = dressCode, contactDetails = contactDetails, locationLink = locationLink, isMultiDay = isMultiDay, endDate = endDate,
+                        context = context, bannerUri = bannerUri
                     ) 
                 },
                 modifier = Modifier.fillMaxWidth()
