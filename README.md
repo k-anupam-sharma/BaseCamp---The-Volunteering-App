@@ -255,3 +255,56 @@ SUPABASE_KEY="YOUR_ANON_KEY"
 
 ### 3. Gradle Distribution Note
 The `gradle/wrapper/gradle-wrapper.properties` has been updated to use a standard internet distribution url (`https://services.gradle.org/distributions/gradle-8.9-bin.zip`). If you were using a local `file:///` distribution URL, Android Studio should automatically download the standard version upon the first Gradle sync, ensuring the project builds cleanly for any contributor on GitHub!
+
+### 4. Recent Database Patches & Migrations
+If you are updating from an older version of the schema, you may need to run these patch scripts to configure the storage buckets, enable Row Level Security for notifications, and add missing columns to the users table.
+
+`sql
+-- 1. Create Profile Pics Bucket
+insert into storage.buckets (id, name, public) 
+values ('profile_pics', 'profile_pics', true);
+
+-- Profile Pics: Master Access
+create policy "Master Access profile_pics"
+on storage.objects
+for all
+using ( bucket_id = 'profile_pics' )
+with check ( bucket_id = 'profile_pics' );
+
+-- 2. Delete any existing restrictive policies on the banners bucket to start fresh
+drop policy if exists "Public Access" on storage.objects;
+drop policy if exists "Upload Access" on storage.objects;
+drop policy if exists "Master Access event_banners" on storage.objects;
+
+-- 3. Create one master policy for Event Banners that allows INSERT, UPDATE, DELETE, and SELECT for everyone
+create policy "Master Access event_banners"
+on storage.objects
+for all
+using ( bucket_id = 'event_banners' )
+with check ( bucket_id = 'event_banners' );
+
+-- 4. Notifications RLS Enablement
+alter table public.notifications enable row level security;
+
+create policy "Users can view their own notifications"
+on public.notifications for select
+using (auth.uid() = user_id);
+
+create policy "Authenticated users can insert notifications"
+on public.notifications for insert
+with check (auth.role() = 'authenticated');
+
+create policy "Users can update their own notifications"
+on public.notifications for update
+using (auth.uid() = user_id);
+
+create policy "Users can delete their own notifications"
+on public.notifications for delete
+using (auth.uid() = user_id);
+
+-- 5. Add missing columns to the users table
+alter table public.users add column if not exists profile_image_url text;
+alter table public.users add column if not exists avatar_url text;
+alter table public.users add column if not exists phone text;
+alter table public.users add column if not exists website text;
+`
