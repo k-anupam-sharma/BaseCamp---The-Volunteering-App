@@ -1,35 +1,30 @@
 package com.example.basecamp.presentation.screens.volunteer
 
-import androidx.compose.foundation.Image
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.basecamp.domain.model.Event
-import com.example.basecamp.utils.QrCodeGenerator
-import org.json.JSONObject
 import coil.compose.AsyncImage
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
-import com.example.basecamp.R
+import com.example.basecamp.domain.model.Event
 import com.example.basecamp.presentation.screens.shared.EventChatSection
 import com.example.basecamp.presentation.screens.shared.EventChatViewModel
 
@@ -37,22 +32,33 @@ import com.example.basecamp.presentation.screens.shared.EventChatViewModel
 fun EventDetailsScreen(
     eventId: String,
     onNavigateBack: () -> Unit,
+    onNavigateToTicket: (String) -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel(),
     chatViewModel: EventChatViewModel = hiltViewModel()
 ) {
     val feedState by viewModel.feedState.collectAsState()
     var event by remember { mutableStateOf<Event?>(null) }
     
-    val currentUserId = viewModel.currentUserId
-    val chatState by chatViewModel.chatState.collectAsState()
-    
     val myTickets by viewModel.myTickets.collectAsState()
     val myTicket = myTickets.find { it.eventId == eventId }
     val isRsvped = myTicket != null
 
-    var showQrDialog by remember { mutableStateOf(false) }
-    var showCancelDialog by remember { mutableStateOf(false) }
-    var cancelReason by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val rsvpState by viewModel.rsvpState.collectAsState()
+
+    LaunchedEffect(rsvpState) {
+        when (rsvpState) {
+            is RsvpState.Success -> {
+                Toast.makeText(context, "Ticket secured!", Toast.LENGTH_SHORT).show()
+                viewModel.resetRsvpState()
+            }
+            is RsvpState.Error -> {
+                Toast.makeText(context, (rsvpState as RsvpState.Error).message, Toast.LENGTH_LONG).show()
+                viewModel.resetRsvpState()
+            }
+            else -> {}
+        }
+    }
 
     LaunchedEffect(feedState, eventId) {
         if (feedState is FeedState.Success) {
@@ -65,24 +71,27 @@ fun EventDetailsScreen(
         chatViewModel.loadComments(eventId)
     }
 
-    val darkBrown = Color(0xFF332B25)
-    val lighterBrown = Color(0xFF4C3F35)
+    val bgColor = Color(0xFF121212)
+    val cardColor = Color(0xFF1E1E1E)
+    val primaryAccent = Color(0xFFFF4B4B)
+    val textPrimary = Color.White
+    val textSecondary = Color(0xFFA0A0A0)
 
-    Box(modifier = Modifier.fillMaxSize().background(darkBrown)) {
+    Box(modifier = Modifier.fillMaxSize().background(bgColor)) {
         if (event == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = Color.White)
+                CircularProgressIndicator(color = primaryAccent)
             }
         } else {
             val validEvent = event!!
             
             Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                // Top Banner Box
-                Box(modifier = Modifier.fillMaxWidth().height(350.dp)) {
+                // Hero Image
+                Box(modifier = Modifier.fillMaxWidth().height(400.dp)) {
                     if (validEvent.bannerUrl != null) {
-                        coil.compose.AsyncImage(
+                        AsyncImage(
                             model = validEvent.bannerUrl,
-                            contentDescription = "Banner",
+                            contentDescription = "Event Image",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
@@ -91,275 +100,210 @@ fun EventDetailsScreen(
                     }
                     
                     // Gradient overlay to blend into background
-                    Box(modifier = Modifier.fillMaxSize().background(
-                        androidx.compose.ui.graphics.Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, darkBrown),
-                            startY = 500f
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, bgColor),
+                                startY = 600f
+                            )
                         )
-                    ))
+                    )
 
-                    // Back button
-                    IconButton(
-                        onClick = onNavigateBack,
-                        modifier = Modifier.padding(16.dp).align(Alignment.TopStart)
-                            .background(Color.Black.copy(alpha = 0.4f), androidx.compose.foundation.shape.CircleShape)
+                    // Top Action Buttons
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .align(Alignment.TopCenter),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .clickable { onNavigateBack() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .clickable { /* Share */ },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Share, contentDescription = "Share", tint = Color.White)
+                        }
+                    }
+
+                    // Price Pill
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text("Free", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
-                
-                // Content Section
-                Column(modifier = Modifier.padding(horizontal = 24.dp).offset(y = (-40).dp)) {
+
+                // Details Content
+                Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                     Text(
                         text = validEvent.title,
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Black,
-                        color = Color.White,
-                        lineHeight = 34.sp
+                        color = textPrimary
                     )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Text(
-                        text = validEvent.date.uppercase(),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White.copy(alpha=0.7f)
-                    )
-                    
                     Spacer(modifier = Modifier.height(8.dp))
-                    
-                    if (isRsvped) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Filled.LocationOn, contentDescription = null, tint = Color(0xFFD3A270), modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("RSVP Confirmed", color = Color(0xFFD3A270), fontWeight = FontWeight.Bold)
-                        }
-                    }
+                    Text(
+                        text = "Cause: ${validEvent.cause} • ${validEvent.location}",
+                        fontSize = 14.sp,
+                        color = textSecondary
+                    )
                     
                     Spacer(modifier = Modifier.height(24.dp))
-                    
-                    // Action Buttons Row
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Button(
-                            onClick = { 
-                                if (!isRsvped) {
-                                    viewModel.rsvpForEvent(validEvent.id!!)
-                                } else {
-                                    showQrDialog = true
-                                }
-                            },
-                            modifier = Modifier.weight(1f).height(56.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = lighterBrown)
-                        ) {
-                            Icon(Icons.Default.Email, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(if (isRsvped) "Show Ticket" else "Attend", color = Color.White, fontWeight = FontWeight.Bold)
+
+                    // Date & Time Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text("Date & Time", fontSize = 12.sp, color = textSecondary)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(validEvent.date, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = textPrimary)
                         }
-                        
-                        if (isRsvped) {
-                            Button(
-                                onClick = { showCancelDialog = true },
-                                modifier = Modifier.weight(1f).height(56.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = androidx.compose.ui.graphics.Color.Red.copy(alpha = 0.8f))
-                            ) {
-                                Text("Cancel RSVP", color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.Bold)
-                            }
-                        } else {
-                            Button(
-                                onClick = { /* Contact functionality */ },
-                                modifier = Modifier.weight(1f).height(56.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = lighterBrown)
-                            ) {
-                                Text("Contact", color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(40.dp))
-                    
-                    // Location
-                    Text("Location", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(validEvent.location, fontSize = 15.sp, color = Color.White.copy(alpha=0.7f))
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    if (validEvent.locationLink.isNotBlank()) {
-                        val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
-                        Text(
-                            text = "View on Maps",
-                            color = Color(0xFFD3A270), // Bronze color to match the theme
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .clickable {
-                                    val url = validEvent.locationLink
-                                    val finalUrl = if (!url.startsWith("http://") && !url.startsWith("https://")) "https://$url" else url
-                                    try {
-                                        uriHandler.openUri(finalUrl)
-                                    } catch (e: Exception) {
-                                        // Silent catch if URL is completely invalid
-                                    }
-                                }
-                                .padding(vertical = 4.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(40.dp))
-                    
-                    // Hosts
-                    Text("Hosts", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
-                            modifier = Modifier.size(48.dp).background(Color.White, androidx.compose.foundation.shape.CircleShape),
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(cardColor),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(validEvent.orgName.take(1).uppercase(), fontWeight = FontWeight.Black, fontSize = 20.sp, color = Color.Black)
+                            Icon(Icons.Default.CalendarToday, contentDescription = "Calendar", tint = textSecondary)
                         }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(validEvent.orgName, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                     }
-                    
-                    Spacer(modifier = Modifier.height(40.dp))
-                    
-                    // About
-                    Text("About the event", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text("About this event", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = textPrimary)
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = validEvent.description.ifBlank { "No description provided for this event." }, 
-                        fontSize = 15.sp, 
-                        color = Color.White.copy(alpha=0.8f), 
-                        lineHeight = 24.sp
+                        text = validEvent.description,
+                        fontSize = 14.sp,
+                        color = textSecondary,
+                        lineHeight = 20.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Text("Details", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = textPrimary)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    DetailRow(Icons.Default.LocationOn, validEvent.location)
+                    DetailRow(Icons.Default.Person, "Organizer: ${validEvent.orgName}")
+                    DetailRow(Icons.Default.Build, validEvent.typeOfWork)
+                    if (validEvent.payment.isNotBlank()) DetailRow(Icons.Default.AttachMoney, validEvent.payment)
+
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    // Chat Section
+                    val currentChatState by chatViewModel.chatState.collectAsState()
+                    EventChatSection(
+                        chatState = currentChatState,
+                        eventOwnerId = validEvent.orgId ?: "",
+                        onAddComment = { text, parentId ->
+                            chatViewModel.addComment(eventId, text, parentId)
+                        },
+                        onToggleLike = { commentId ->
+                            chatViewModel.toggleLike(commentId)
+                        },
+                        onRefresh = { chatViewModel.loadComments(eventId) }
                     )
                     
-                    Spacer(modifier = Modifier.height(40.dp))
-                    
-                    // Additional Details
-                    if (validEvent.typeOfWork.isNotBlank() || validEvent.payment.isNotBlank() || validEvent.dressCode.isNotBlank()) {
-                        Text("Additional Details", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        if (validEvent.typeOfWork.isNotBlank()) DetailItem("Type of Work", validEvent.typeOfWork)
-                        if (validEvent.payment.isNotBlank()) DetailItem("Perks / Payment", validEvent.payment)
-                        if (validEvent.dressCode.isNotBlank()) DetailItem("Dress Code", validEvent.dressCode)
-                        
-                        Spacer(modifier = Modifier.height(40.dp))
-                    }
-                    
-                    // Chat Section (Integrated at bottom)
-                    Text("Discussion", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Box(modifier = Modifier.fillMaxWidth().height(400.dp)) {
-                        EventChatSection(
-                            chatState = chatState,
-                            eventOwnerId = validEvent.orgId,
-                            onAddComment = { text, parentId ->
-                                chatViewModel.addComment(eventId, text, parentId)
-                            },
-                            onToggleLike = { commentId ->
-                                chatViewModel.toggleLike(commentId)
-                            },
-                            onRefresh = {
-                                chatViewModel.loadComments(eventId)
-                            }
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(48.dp))
+                    Spacer(modifier = Modifier.height(100.dp)) // Space for sticky bottom bar
                 }
             }
 
-            // QR Code Dialog
-            if (showQrDialog && myTicket != null) {
-                AlertDialog(
-                    onDismissRequest = { showQrDialog = false },
-                    containerColor = Color(0xFF1E1E1E),
-                    title = {
-                        Text("Your Ticket", color = Color.White, fontWeight = FontWeight.Bold)
-                    },
-                    text = {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                            val payload = JSONObject().apply {
-                                put("eventId", validEvent.id)
-                                put("volunteerId", currentUserId)
-                            }.toString()
-                            
-                            val qrBitmap = remember(payload) {
-                                QrCodeGenerator.generateQrCode(payload)
+            // Sticky Bottom Action Bar
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, bgColor, bgColor),
+                            startY = 0f
+                        )
+                    )
+                    .padding(24.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(cardColor)
+                            .clickable { /* Like */ },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Like", tint = textSecondary)
+                    }
+                    
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Button(
+                        onClick = {
+                            val safeId = validEvent.id ?: ""
+                            if (isRsvped) {
+                                onNavigateToTicket(safeId)
+                            } else {
+                                viewModel.rsvpForEvent(safeId)
                             }
-                            
-                            Image(
-                                bitmap = qrBitmap.asImageBitmap(),
-                                contentDescription = "QR Code",
-                                modifier = Modifier.size(200.dp).clip(RoundedCornerShape(8.dp))
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryAccent),
+                        shape = RoundedCornerShape(28.dp)
+                    ) {
+                        if (rsvpState is RsvpState.Loading) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                        } else {
+                            Text(
+                                text = if (isRsvped) "View Ticket" else "Get a Ticket",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text("Status: ${myTicket.status}", color = Color.White, fontWeight = FontWeight.Bold)
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { showQrDialog = false }) {
-                            Text("Close", color = Color(0xFFD3A270))
                         }
                     }
-                )
-            }
-            
-            if (showCancelDialog) {
-                androidx.compose.material3.AlertDialog(
-                    onDismissRequest = { showCancelDialog = false },
-                    title = { Text("Cancel RSVP") },
-                    text = {
-                        androidx.compose.foundation.layout.Column {
-                            Text("Are you sure you want to cancel your RSVP? Please provide a reason.")
-                            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
-                            androidx.compose.material3.OutlinedTextField(
-                                value = cancelReason,
-                                onValueChange = { cancelReason = it },
-                                label = { Text("Reason") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    },
-                    confirmButton = {
-                        androidx.compose.material3.TextButton(onClick = {
-                            if (cancelReason.isNotBlank()) {
-                                viewModel.cancelRsvp(validEvent.id!!, cancelReason)
-                                showCancelDialog = false
-                                cancelReason = ""
-                            }
-                        }) {
-                            Text("Submit")
-                        }
-                    },
-                    dismissButton = {
-                        androidx.compose.material3.TextButton(onClick = { showCancelDialog = false }) {
-                            Text("Close")
-                        }
-                    }
-                )
+                }
             }
         }
     }
 }
 
 @Composable
-fun DetailItem(label: String, value: String) {
-    Column(modifier = Modifier.padding(bottom = 16.dp)) {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFFD3A270) // bronze tone
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = value,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.White.copy(alpha=0.9f)
-        )
+fun DetailRow(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
+    if (text.isNotBlank()) {
+        Row(
+            modifier = Modifier.padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(icon, contentDescription = null, tint = Color(0xFFA0A0A0), modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text, color = Color(0xFFA0A0A0), fontSize = 14.sp)
+        }
     }
 }

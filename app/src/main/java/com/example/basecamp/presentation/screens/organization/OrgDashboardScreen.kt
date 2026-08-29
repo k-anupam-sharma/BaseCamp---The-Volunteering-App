@@ -3,43 +3,30 @@ package com.example.basecamp.presentation.screens.organization
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.basecamp.domain.model.Event
-import com.example.basecamp.presentation.components.GlassPanel
-import com.example.basecamp.presentation.components.GlacierButton
-import com.example.basecamp.presentation.components.AnimatedBackground
-import com.example.basecamp.presentation.components.skeuoCard
-import com.example.basecamp.presentation.components.skeuoIcon
-import com.example.basecamp.presentation.components.skeuoButtonPrimary
+import com.example.basecamp.presentation.components.BaseCampBackground
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrgDashboardScreen(
     onNavigateToProfile: () -> Unit = {},
@@ -51,13 +38,16 @@ fun OrgDashboardScreen(
     val dashboardState by viewModel.dashboardState.collectAsState()
     var selectedTab by remember { mutableStateOf("DASHBOARD") }
 
-    androidx.compose.runtime.LaunchedEffect(selectedTab) {
-        if (selectedTab == "NOTIFICATIONS") {
-            viewModel.fetchNotifications()
-        }
+    val primaryAccent = Color(0xFFFF4B4B)
+    val cardBackground = Color(0xFF1E1E1E)
+    val textPrimary = Color.White
+    val textSecondary = Color(0xFFA0A0A0)
+
+    LaunchedEffect(selectedTab) {
+        // Handle tab changes if needed
     }
 
-        LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
         while (true) {
             kotlinx.coroutines.delay(5_000)
             viewModel.fetchDashboardData(showLoading = false)
@@ -65,164 +55,139 @@ fun OrgDashboardScreen(
     }
     
     Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedBackground()
-
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
-            bottomBar = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
+        BaseCampBackground {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent,
+                bottomBar = {
+                    Box(
                         modifier = Modifier
-                            .width(330.dp)
-                            .skeuoCard(RoundedCornerShape(percent = 50))
-                            .padding(horizontal = 8.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .width(340.dp)
+                                .height(64.dp)
+                                .clip(RoundedCornerShape(32.dp))
+                                .background(Color(0xFF161616)),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val iconTint = Color(0xFF707070)
+                            val selectedTint = primaryAccent
+                            
+                            // 1. Dashboard
+                            IconButton(onClick = { selectedTab = "DASHBOARD" }) {
+                                Icon(
+                                    Icons.Default.Dashboard,
+                                    contentDescription = "Dashboard",
+                                    tint = if (selectedTab == "DASHBOARD") selectedTint else iconTint
+                                )
+                            }
+                            
+                            // 2. Scan Tickets
+                            IconButton(onClick = onNavigateToScan) {
+                                Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan Tickets", tint = iconTint)
+                            }
+
+                            // 3. Create Event (Large +)
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .background(primaryAccent)
+                                    .clickable { onNavigateToCreate(null) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Add, contentDescription = "Create Event", tint = Color.Black, modifier = Modifier.size(32.dp))
+                            }
+
+                            // 4. Notifications
+                            IconButton(onClick = { selectedTab = "NOTIFICATIONS" }) {
+                                Icon(
+                                    Icons.Default.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = if (selectedTab == "NOTIFICATIONS") selectedTint else iconTint
+                                )
+                            }
+
+                            // 5. My Profile
+                            IconButton(onClick = onNavigateToProfile) {
+                                Icon(Icons.Default.Person, contentDescription = "My Profile", tint = iconTint)
+                            }
+                        }
+                    }
+                }
+            ) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val iconTint = Color(0xFFC5C5D4)
-                        val selectedTint = Color.White
+                        Text(
+                            text = "Organization HQ",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Black,
+                            color = textPrimary
+                        )
                         
-                        // 1. Dashboard
-                        IconButton(
-                            onClick = { selectedTab = "DASHBOARD" },
+                        Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .then(if (selectedTab == "DASHBOARD") Modifier.skeuoIcon(CircleShape) else Modifier)
-                        ) {
-                            Icon(Icons.Filled.Dashboard, contentDescription = "Dashboard", tint = if (selectedTab == "DASHBOARD") selectedTint else iconTint)
-                        }
-                        
-                        // 2. Scan Tickets
-                        IconButton(
-                            onClick = onNavigateToScan,
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Icon(Icons.Filled.QrCodeScanner, contentDescription = "Scan Tickets", tint = iconTint)
-                        }
-
-                        // 3. Create Event (Large +)
-                        IconButton(
-                            onClick = { onNavigateToCreate(null) },
-                            modifier = Modifier
-                                .size(64.dp)
-                                .shadow(
-                                    elevation = 6.dp,
-                                    shape = CircleShape,
-                                    spotColor = Color(0x80000000),
-                                    ambientColor = Color(0x80000000)
-                                )
-                                .background(Color.White, CircleShape)
-                        ) {
-                            Icon(Icons.Filled.Add, contentDescription = "Create Event", tint = Color.Black, modifier = Modifier.size(32.dp))
-                        }
-
-                        // 4. Notifications
-                        IconButton(
-                            onClick = { selectedTab = "NOTIFICATIONS" },
-                            modifier = Modifier
-                                .size(48.dp)
-                                .then(if (selectedTab == "NOTIFICATIONS") Modifier.skeuoIcon(CircleShape) else Modifier)
-                        ) {
-                            Icon(Icons.Filled.Notifications, contentDescription = "Notifications", tint = if (selectedTab == "NOTIFICATIONS") selectedTint else iconTint)
-                        }
-
-                        // 5. My Profile
-                        IconButton(
-                            onClick = onNavigateToProfile,
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Icon(Icons.Filled.Person, contentDescription = "My Profile", tint = iconTint)
-                        }
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color.Gray)
+                                .clickable { onNavigateToProfile() }
+                        )
                     }
-                }
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp, top = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Org Dashboard",
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        letterSpacing = 1.sp
-                    )
-                }
-                
-                
-                
-                when (dashboardState) {
-                    is DashboardState.Loading -> {
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    if (selectedTab == "NOTIFICATIONS") {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground)
+                            Text("No notifications", color = textSecondary)
                         }
-                    }
-                    is DashboardState.Error -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = (dashboardState as DashboardState.Error).message,
-                                color = Color(0xFF7DD3FC),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                    is DashboardState.Success -> {
-                        if (selectedTab == "NOTIFICATIONS") {
-                            val notifs by viewModel.notifications.collectAsState()
-                            if (notifs.isEmpty()) {
-                                androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    androidx.compose.material3.Text("No notifications", fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
-                                }
-                            } else {
-                                androidx.compose.foundation.lazy.LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    items(notifs.size) { index ->
-                                        val notif = notifs[index]
-                                        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth().skeuoCard(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).padding(16.dp)) {
-                                            androidx.compose.foundation.layout.Column {
-                                                androidx.compose.material3.Text(notif.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 18.sp)
-                                                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(4.dp))
-                                                androidx.compose.material3.Text(notif.message, color = Color.LightGray)
-                                            }
-                                        }
-                                    }
+                    } else {
+                        when (dashboardState) {
+                            is DashboardState.Loading -> {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator(color = primaryAccent)
                                 }
                             }
-                        } else {
-                            val eventsWithCounts = (dashboardState as DashboardState.Success).eventsWithCounts
-                            if (eventsWithCounts.isEmpty()) {
-                                androidx.compose.foundation.layout.Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    androidx.compose.material3.Text(text = "No active events", fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
+                            is DashboardState.Error -> {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Text((dashboardState as DashboardState.Error).message, color = primaryAccent)
                                 }
-                            } else {
-                                androidx.compose.foundation.lazy.LazyColumn(
-                                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    items(eventsWithCounts) { (event, count) ->
-                                        OrgEventCard(
-                                              event = event,
-                                              count = count,
-                                              viewModel = viewModel,
-                                              onNavigateToEventDetails = onNavigateToEventDetails,
-                                              onEditEvent = { onNavigateToCreate(it) }
-                                          )
+                            }
+                            is DashboardState.Success -> {
+                                val eventsWithCounts = (dashboardState as DashboardState.Success).eventsWithCounts
+                                if (eventsWithCounts.isEmpty()) {
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Text("No events yet. Tap the + to create one!", color = textSecondary)
+                                    }
+                                } else {
+                                    LazyColumn(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        items(eventsWithCounts) { (event, rsvpCount) ->
+                                            NewOrgEventCard(
+                                                event = event,
+                                                rsvpCount = rsvpCount,
+                                                onEditClick = { onNavigateToCreate(event.id ?: "") },
+                                                onClick = { onNavigateToEventDetails(event.id ?: "") }
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -235,101 +200,98 @@ fun OrgDashboardScreen(
 }
 
 @Composable
-fun OrgEventCard(
+fun NewOrgEventCard(
     event: Event,
-    onEditEvent: (String) -> Unit,
-    count: Int,
-    viewModel: OrgViewModel,
-    onNavigateToEventDetails: (String) -> Unit
+    rsvpCount: Int,
+    onEditClick: () -> Unit,
+    onClick: () -> Unit
 ) {
-    com.example.basecamp.presentation.components.GlassPanel(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { event.id?.let { onNavigateToEventDetails(it) } },
-        backgroundColor = androidx.compose.ui.graphics.Color(0x662B2B2B)
+            .height(220.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .clickable { onClick() }
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp)
-        ) {
-            if (event.bannerUrl != null) {
-                coil.compose.AsyncImage(
-                    model = event.bannerUrl,
-                    contentDescription = "Event Banner",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-            val displayDate = if (event.isMultiDay && event.endDate.isNotBlank()) {
-                "${event.date} - ${event.endDate}".uppercase()
-            } else {
-                event.date.uppercase()
-            }
-            Text(
-                text = displayDate,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = androidx.compose.ui.graphics.Color(0xFFD4D4D4)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = event.title,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = androidx.compose.ui.graphics.Color.White
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.LocationOn, contentDescription = "Location", tint = androidx.compose.ui.graphics.Color(0xFFB3B3B3), modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = event.location,
-                    fontSize = 12.sp,
-                    color = androidx.compose.ui.graphics.Color(0xFFB3B3B3)
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            val maxStr = if (event.maxVolunteers > 0) event.maxVolunteers.toString() else "Unlimited"
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Group, contentDescription = "RSVPs", tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${count} / ${maxStr} RSVPs",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = androidx.compose.ui.graphics.Color.White
+        AsyncImage(
+            model = event.bannerUrl,
+            contentDescription = "Event Image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        
+        // Gradient overlay
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
+                        startY = 100f
                     )
+                )
+        )
+        
+        // Date Badge Top Right
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(12.dp)
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.6f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                val parts = event.date.split(" ")
+                if (parts.size >= 2) {
+                    Text(parts[0], color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text(parts[1], color = Color.White, fontSize = 10.sp)
+                } else {
+                    Text(event.date.take(5), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
-                
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    androidx.compose.material3.IconButton(
-                        onClick = { event.id?.let { onEditEvent(it) } },
-                        modifier = Modifier.size(36.dp).background(androidx.compose.ui.graphics.Color(0x40FFFFFF), CircleShape)
-                    ) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit Event", tint = androidx.compose.ui.graphics.Color.White)
-                    }
-                    androidx.compose.material3.IconButton(
-                        onClick = { event.id?.let { viewModel.deleteEvent(it) } },
-                        modifier = Modifier.size(36.dp).background(Color(0xFFE53935).copy(alpha = 0.3f), CircleShape)
-                    ) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = Color(0xFFFFCDD2))
-                    }
+            }
+        }
+        
+        // Bottom Content
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = event.title,
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "$rsvpCount/${event.maxVolunteers} RSVPs", color = Color(0xFFFF4B4B), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(text = " • ", color = Color.LightGray, fontSize = 12.sp)
+                    Text(text = event.cause, color = Color.LightGray, fontSize = 12.sp)
                 }
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // Edit Button
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .clickable { onEditClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Black, modifier = Modifier.size(20.dp))
             }
         }
     }
 }
-
-
-
-
-

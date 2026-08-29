@@ -1,69 +1,63 @@
 package com.example.basecamp.presentation.screens.volunteer
 
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.clickable
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.EventAvailable
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.basecamp.presentation.components.skeuoCard
-import com.example.basecamp.presentation.components.skeuoIcon
-import androidx.compose.ui.platform.LocalContext
-import android.widget.Toast
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.basecamp.domain.model.Event
-import com.example.basecamp.presentation.components.GlacierButton
-import com.example.basecamp.presentation.components.GlassPanel
-import com.example.basecamp.presentation.components.AnimatedBackground
+import com.example.basecamp.presentation.components.BaseCampBackground
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VolunteerDashboardScreen(
     onNavigateToProfile: () -> Unit = {},
     onNavigateToEventDetails: (String) -> Unit,
+    onNavigateToTicket: (String) -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val feedState by viewModel.feedState.collectAsState()
     val rsvpState by viewModel.rsvpState.collectAsState()
     val rsvpEventIds by viewModel.rsvpEventIds.collectAsState()
-    val attendedCount by viewModel.attendedCount.collectAsState()
 
     var selectedTab by remember { mutableStateOf("ALL") }
-
-    androidx.compose.runtime.LaunchedEffect(selectedTab) {
-        if (selectedTab == "NOTIFICATIONS") {
-            viewModel.fetchNotifications()
-        }
-    }
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCause by remember { mutableStateOf("All") }
 
     val context = LocalContext.current
+
+    val primaryAccent = Color(0xFFFF4B4B)
+    val cardBackground = Color(0xFF1E1E1E)
+    val searchBackground = Color(0xFF2C2C2C)
+    val textPrimary = Color.White
+    val textSecondary = Color(0xFFA0A0A0)
+
+    val causes = listOf("All", "Animal Welfare", "Environmental", "Education", "Health", "Community", "Other")
+
+    LaunchedEffect(selectedTab) {
+        // Handle tab changes if needed
+    }
 
     LaunchedEffect(rsvpState) {
         when (rsvpState) {
@@ -78,7 +72,7 @@ fun VolunteerDashboardScreen(
             else -> {}
         }
     }
-    
+
     LaunchedEffect(Unit) {
         while (true) {
             kotlinx.coroutines.delay(5_000)
@@ -86,243 +80,310 @@ fun VolunteerDashboardScreen(
         }
     }
 
-
     Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedBackground()
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = androidx.compose.ui.graphics.Color.Transparent,
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
+        BaseCampBackground {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent,
+                bottomBar = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .width(300.dp)
+                                .height(64.dp)
+                                .clip(RoundedCornerShape(32.dp))
+                                .background(Color(0xFF161616)),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val iconTint = Color(0xFF707070)
+                            val selectedTint = primaryAccent
+
+                            IconButton(onClick = { selectedTab = "ALL" }) {
+                                Icon(
+                                    Icons.Default.Explore,
+                                    contentDescription = "All Events",
+                                    tint = if (selectedTab == "ALL") selectedTint else iconTint
+                                )
+                            }
+                            IconButton(onClick = { selectedTab = "RSVPS" }) {
+                                Icon(
+                                    Icons.Default.EventAvailable,
+                                    contentDescription = "My RSVPs",
+                                    tint = if (selectedTab == "RSVPS") selectedTint else iconTint
+                                )
+                            }
+                            IconButton(onClick = { selectedTab = "NOTIFICATIONS" }) {
+                                Icon(
+                                    Icons.Default.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = if (selectedTab == "NOTIFICATIONS") selectedTint else iconTint
+                                )
+                            }
+                            IconButton(onClick = onNavigateToProfile) {
+                                Icon(
+                                    Icons.Default.Person,
+                                    contentDescription = "My Profile",
+                                    tint = iconTint
+                                )
+                            }
+                        }
+                    }
+                }
+            ) { innerPadding ->
+                Column(
                     modifier = Modifier
-                        .width(330.dp)
-                        .skeuoCard(androidx.compose.foundation.shape.RoundedCornerShape(percent = 50))
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp)
                 ) {
-                    val iconTint = Color(0xFFC5C5D4)
-                    val selectedTint = Color.White
+                    Spacer(modifier = Modifier.height(24.dp))
                     
-                    androidx.compose.material3.IconButton(
-                        onClick = { selectedTab = "ALL" },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .then(if (selectedTab == "ALL") Modifier.skeuoIcon(androidx.compose.foundation.shape.CircleShape) else Modifier)
+                    // Header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Explore, contentDescription = "All Events", tint = if (selectedTab == "ALL") selectedTint else iconTint)
+                        IconButton(onClick = { /* Menu */ }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = textPrimary)
+                        }
+                        
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.LocationOn, contentDescription = "Location", tint = primaryAccent, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Global", color = textPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color.Gray)
+                                .clickable { onNavigateToProfile() }
+                        )
                     }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Search Bar
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(28.dp)),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = searchBackground,
+                            unfocusedContainerColor = searchBackground,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = textPrimary,
+                            unfocusedTextColor = textPrimary,
+                            cursorColor = primaryAccent
+                        ),
+                        placeholder = { Text("Search all events...", color = textSecondary) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = textSecondary) },
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
                     
-                    androidx.compose.material3.IconButton(
-                        onClick = { selectedTab = "RSVPS" },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .then(if (selectedTab == "RSVPS") Modifier.skeuoIcon(androidx.compose.foundation.shape.CircleShape) else Modifier)
-                    ) {
-                        androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.EventAvailable, contentDescription = "My RSVPs", tint = if (selectedTab == "RSVPS") selectedTint else iconTint)
+                    Text("Upcoming events", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = textPrimary)
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Cause Filters
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(causes) { cause ->
+                            val isSelected = selectedCause == cause
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(if (isSelected) primaryAccent else searchBackground)
+                                    .clickable { selectedCause = cause }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = cause,
+                                    color = if (isSelected) Color.White else textSecondary,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
                     }
 
-                    androidx.compose.material3.IconButton(
-                        onClick = { selectedTab = "NOTIFICATIONS" },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .then(if (selectedTab == "NOTIFICATIONS") Modifier.skeuoIcon(androidx.compose.foundation.shape.CircleShape) else Modifier)
-                    ) {
-                        androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Notifications, contentDescription = "Notifications", tint = if (selectedTab == "NOTIFICATIONS") selectedTint else iconTint)
-                    }
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                    androidx.compose.material3.IconButton(
-                        onClick = onNavigateToProfile,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Filled.Person, contentDescription = "My Profile", tint = iconTint)
-                    }
-                }
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                
-                .padding(innerPadding)
-                .padding(16.dp)
-        ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp, top = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Volunteer Feed",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
-                letterSpacing = 1.sp
-            )
-
-        }
-        
-        // Attended Count Header
-        GlassPanel(
-            backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant, // Cyan
-            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "EVENTS ATTENDED: $attendedCount",
-                    fontWeight = FontWeight.Black,
-                    fontSize = 18.sp,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
-                )
-            }
-        }
-
-        when (feedState) {
-            is FeedState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
-                }
-            }
-            is FeedState.Success -> {
-                if (selectedTab == "NOTIFICATIONS") {
-                    val notifs by viewModel.notifications.collectAsState()
-                    if (notifs.isEmpty()) {
-                        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            androidx.compose.material3.Text("No notifications", fontWeight = FontWeight.Bold, color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
+                    // Content
+                    if (selectedTab == "NOTIFICATIONS") {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("No notifications", color = textSecondary)
                         }
                     } else {
-                        androidx.compose.foundation.lazy.LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            items(notifs.size) { index ->
-                                val notif = notifs[index]
-                                androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxWidth().skeuoCard(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).padding(16.dp)) {
-                                    androidx.compose.foundation.layout.Column {
-                                        androidx.compose.material3.Text(notif.title, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 18.sp)
-                                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(4.dp))
-                                        androidx.compose.material3.Text(notif.message, color = Color.LightGray)
+                        when (feedState) {
+                            is FeedState.Loading -> {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator(color = primaryAccent)
+                                }
+                            }
+                            is FeedState.Error -> {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Text((feedState as FeedState.Error).message, color = primaryAccent)
+                                }
+                            }
+                            is FeedState.Success -> {
+                                val allEvents = (feedState as FeedState.Success).availableEvents + (feedState as FeedState.Success).rsvpedEvents
+                                val filteredEvents = allEvents.filter { event ->
+                                    val safeId = event.id ?: ""
+                                    val matchesSearch = event.title.contains(searchQuery, ignoreCase = true) || event.location.contains(searchQuery, ignoreCase = true)
+                                    val matchesCause = selectedCause == "All" || event.cause == selectedCause
+                                    val matchesTab = if (selectedTab == "RSVPS") rsvpEventIds.contains(safeId) else !rsvpEventIds.contains(safeId)
+                                    matchesSearch && matchesCause && matchesTab
+                                }
+
+                                if (filteredEvents.isEmpty()) {
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Text("No events found", color = textSecondary)
+                                    }
+                                } else {
+                                    LazyColumn(
+                                        modifier = Modifier.fillMaxSize(),
+                                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                                    ) {
+                                        items(filteredEvents) { event ->
+                                            val safeId = event.id ?: ""
+                                            val isRsvped = rsvpEventIds.contains(safeId)
+                                            NewEventCard(
+                                                event = event,
+                                                isRsvped = isRsvped,
+                                                onClick = {
+                                                    if (isRsvped) {
+                                                        onNavigateToTicket(safeId)
+                                                    } else {
+                                                        onNavigateToEventDetails(safeId)
+                                                    }
+                                                },
+                                                onRsvpClick = { viewModel.rsvpForEvent(safeId) }
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                } else {
-                    val availableEvents = (feedState as FeedState.Success).availableEvents
-                    val rsvpedEvents = (feedState as FeedState.Success).rsvpedEvents
-                    val eventsToShow = if (selectedTab == "ALL") availableEvents else rsvpedEvents
-                
-                if (eventsToShow.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = if (selectedTab == "ALL") "No available events" else "You haven't RSVP'd yet", 
-                            fontWeight = FontWeight.Bold,
-                            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(eventsToShow) { event ->
-                            EventCard(
-                                event = event, 
-                                onCardClick = {
-                                    event.id?.let { onNavigateToEventDetails(it) }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-            }
-            is FeedState.Error -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = (feedState as FeedState.Error).message,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.tertiary, // Hot Pink
-                        fontWeight = FontWeight.Bold
-                    )
                 }
             }
         }
     }
 }
-}
-}
-
-
-
 
 @Composable
-fun EventCard(event: Event, onCardClick: () -> Unit) {
-    com.example.basecamp.presentation.components.GlassPanel(
+fun NewEventCard(
+    event: Event,
+    isRsvped: Boolean,
+    onClick: () -> Unit,
+    onRsvpClick: () -> Unit
+) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onCardClick() },
-        backgroundColor = androidx.compose.ui.graphics.Color(0x662B2B2B)
+            .height(220.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .clickable { onClick() }
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp)
+        AsyncImage(
+            model = event.bannerUrl,
+            contentDescription = "Event Image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        
+        // Gradient overlay
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
+                        startY = 100f
+                    )
+                )
+        )
+        
+        // Date Badge Top Right
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(12.dp)
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.6f)),
+            contentAlignment = Alignment.Center
         ) {
-            if (event.bannerUrl != null) {
-                coil.compose.AsyncImage(
-                    model = event.bannerUrl,
-                    contentDescription = "Event Banner",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp)),
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Parsing logic to split "10 Feb 2026" or similar
+                val parts = event.date.split(" ")
+                if (parts.size >= 2) {
+                    Text(parts[0], color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text(parts[1], color = Color.White, fontSize = 10.sp)
+                } else {
+                    Text(event.date.take(5), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
             }
-            val displayDate = if (event.isMultiDay && event.endDate.isNotBlank()) {
-                "${event.date} - ${event.endDate}".uppercase()
-            } else {
-                event.date.uppercase()
-            }
-            Text(
-                text = displayDate,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = androidx.compose.ui.graphics.Color(0xFFD4D4D4)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = event.title,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = androidx.compose.ui.graphics.Color.White
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.LocationOn, contentDescription = "Location", tint = androidx.compose.ui.graphics.Color(0xFFB3B3B3), modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(4.dp))
+        }
+        
+        // Bottom Content
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = event.location,
-                    fontSize = 12.sp,
-                    color = androidx.compose.ui.graphics.Color(0xFFB3B3B3)
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Hosted by ${event.orgName}",
-                    fontSize = 12.sp,
+                    text = event.title,
+                    color = Color.White,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = androidx.compose.ui.graphics.Color.White
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = event.location, color = Color.LightGray, fontSize = 12.sp)
+                    Text(text = " • ", color = Color.LightGray, fontSize = 12.sp)
+                    Text(text = event.cause, color = Color.LightGray, fontSize = 12.sp)
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // Price/Free Pill
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (isRsvped) "View Ticket" else "View Details",
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
     }
 }
-
-

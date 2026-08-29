@@ -16,6 +16,7 @@ import com.example.basecamp.presentation.screens.organization.CreateEventScreen
 import com.example.basecamp.presentation.screens.volunteer.VolunteerDashboardScreen
 import com.example.basecamp.presentation.screens.volunteer.EventDetailsScreen
 import com.example.basecamp.presentation.screens.organization.OrgEventDetailsScreen
+import com.example.basecamp.presentation.screens.volunteer.TicketScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -30,6 +31,9 @@ sealed class Screen(val route: String) {
     }
     object EventDetails : Screen("event_details/{eventId}") {
         fun createRoute(eventId: String) = "event_details/$eventId"
+    }
+    object Ticket : Screen("ticket/{eventId}") {
+        fun createRoute(eventId: String) = "ticket/$eventId"
     }
     object OrgEventDetails : Screen("org_event_details/{eventId}") {
         fun createRoute(eventId: String) = "org_event_details/$eventId"
@@ -137,7 +141,8 @@ fun BaseCampNavGraph(
         composable(route = Screen.VolunteerDashboard.route) {
             VolunteerDashboardScreen(
                 onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
-                onNavigateToEventDetails = { eventId -> navController.navigate(Screen.EventDetails.createRoute(eventId)) }
+                onNavigateToEventDetails = { eventId -> navController.navigate(Screen.EventDetails.createRoute(eventId)) },
+                onNavigateToTicket = { eventId -> navController.navigate(Screen.Ticket.createRoute(eventId)) }
             )
         }
 
@@ -147,6 +152,18 @@ fun BaseCampNavGraph(
         ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
             EventDetailsScreen(
+                eventId = eventId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToTicket = { id -> navController.navigate(Screen.Ticket.createRoute(id)) }
+            )
+        }
+        
+        composable(
+            route = Screen.Ticket.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
+            TicketScreen(
                 eventId = eventId,
                 onNavigateBack = { navController.popBackStack() }
             )
