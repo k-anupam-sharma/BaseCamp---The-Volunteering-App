@@ -138,7 +138,7 @@ You will need a free [Supabase](https://supabase.com/) project to act as the bac
 1. Create a new project in Supabase.
 2. Go to the **SQL Editor** and run the following queries to build your tables and set up security:
 
-```sql
+`````sql
 -- 1. Create Users Table
 create table public.users (
   id uuid primary key references auth.users(id),
@@ -259,7 +259,7 @@ The `gradle/wrapper/gradle-wrapper.properties` has been updated to use a standar
 ### 4. Recent Database Patches & Migrations
 If you are updating from an older version of the schema, you may need to run these patch scripts to configure the storage buckets, enable Row Level Security for notifications, and add missing columns to the users table.
 
-`sql
+```sql
 -- 1. Create Profile Pics Bucket
 insert into storage.buckets (id, name, public) 
 values ('profile_pics', 'profile_pics', true);
@@ -307,4 +307,4 @@ alter table public.users add column if not exists profile_image_url text;
 alter table public.users add column if not exists avatar_url text;
 alter table public.users add column if not exists phone text;
 alter table public.users add column if not exists website text;
-`
+```
