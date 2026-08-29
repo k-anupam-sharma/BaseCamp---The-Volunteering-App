@@ -202,7 +202,24 @@ create table public.comment_likes (
   user_id uuid not null references public.users(id),
   unique(comment_id, user_id)
 );
-```
+
+-- 6. Create Notifications Table
+create table public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamp with time zone default now(),
+  user_id uuid not null references public.users(id) on delete cascade,
+  title text not null,
+  message text not null,
+  is_read boolean default false
+);
+`
+
+### Table Explanations
+*   **users**: Stores the core profile data for both Volunteers and Organizations. Links directly to Supabase Auth and holds profile image URLs, phone numbers, and websites.
+*   **events**: Contains all details for community events created by Organizations, including capacity (max_volunteers), cause, and banner images.
+*   **tickets**: Manages RSVPs and attendance. Links a Volunteer to an Event and tracks check-in/check-out timestamps to automatically calculate their volunteering duration.
+*   **comments & comment_likes**: Powers the real-time interactive chat on event pages, supporting nested replies (parent_id) and user likes.
+*   **notifications**: Stores dynamic in-app alerts (e.g., when an Organization updates an event's details or when a Volunteer RSVPs/Cancels).``
 ### 2. Supabase Storage Setup
 The app uses Supabase Storage for profile pictures.
 1. In your Supabase Dashboard, go to **Storage**.
